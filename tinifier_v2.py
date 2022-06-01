@@ -6,10 +6,13 @@ import PIL
 import sys
 import time
 
-PIL.Image.MAX_IMAGE_PIXELS = 933120000 #Increases the number of pixels pillow can read (Else it thinks big images are zip bombs, dumbass lib)
-resolutionX=1600
-resolutionY=900
+#Used just for deleting lines of text in cmd for windows
+import ctypes
+kernel32 = ctypes.windll.kernel32
+kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
+########################################################
 
+PIL.Image.MAX_IMAGE_PIXELS = 933120000 #Increases the number of pixels pillow can read (Else it thinks big images are zip bombs, dumbass lib)
 
 tinyKeys=["2qBR9TsY7zxL8Q0HsBLnnNf65nY52y4f","Lts1zqlkzjzxbvDNvj9NZl6zNDNVBmZH","YjCS9FvvdBmZJ8pgZwwVwGR9bvmQ7lpT"]
 tinyKeyVal=0
@@ -17,13 +20,15 @@ tinify.key = tinyKeys[tinyKeyVal]
 
 compressions_this_month = tinify.compression_count
 
-rawPath=r"/mnt/c/Users/Callum/Documents/Work/ImageProject/Raw/"
-resizedPath=r"/mnt/c/Users/Callum/Documents/Work/ImageProject/Resized/"
-compPath=r"/mnt/c/Users/Callum/Documents/Work/ImageProject/AutoCompressed/"
+rawPath=r"C:\Users\S20103502\Documents\Work\Tools\Raw\\"
+resizedPath=r"C:\Users\S20103502\Documents\Work\Tools\Resized\\"
+compPath=r"C:\Users\S20103502\Documents\Work\Tools\AutoCompressed\\"
 
 imagesArray=[]
 errorPaths=[]
 
+widthX=900
+widthY=600
 
 
 def eraseLine(eraseVal):#Erases the number of lines passed to it
@@ -37,7 +42,7 @@ def eraseLine(eraseVal):#Erases the number of lines passed to it
 
 #main
 print("\n"*50)
-
+print("Resolution:",widthX,widthY)
 courseName=input("Course name:")
 courseName=courseName.title()#Capitalizes the first letter of each word so the user doesnt have to because im lazy
 courseName=courseName.replace(" ","_")
@@ -102,7 +107,7 @@ for image in imagesArray:#Every file within the dir
     while isResized==False:
         try:
             source = tinify.from_file(JpgPath)
-            resized = source.resize(method="cover",width=resolutionX,height=resolutionY)
+            resized = source.resize(method="cover",width=widthX,height=widthY)
             resized.to_file(resizedPath+filename)
             print("Resized image successfully")
             isResized=True
@@ -175,7 +180,7 @@ for image in imagesArray:#Every file within the dir
         
             
 #Moves all dirs to the 'organized' folder
-courseDir=r'/mnt/c/Users/Callum/Documents/Work/ImageProject/Organized/'+courseName
+courseDir=r"C:\Users\S20103502\Documents\Work\Tools\Organized\\"+courseName
 print("\nMoving dirs to",courseName)
 shutil.move(rawPath,courseDir)
 shutil.move(resizedPath,courseDir)
