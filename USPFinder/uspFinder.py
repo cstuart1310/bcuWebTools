@@ -119,8 +119,7 @@ if continueInp=="y":
         else:
             if scrape(siteURL):#Gets HTML as plain text
                 print("Read HTML for site",siteURL,siteIndex,"/",linksLength)
-                getFaculty()
-                getSchool()
+
                 findUSPs(siteURL)#Looks for phrase in HTML
 
     print("-----Done scraping!-----")
