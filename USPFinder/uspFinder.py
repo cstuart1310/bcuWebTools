@@ -33,7 +33,7 @@ def scrape(siteURL):
         writer.writerow(["None","",siteURL,"""Page is not public"""])
         return False
 
-def find(siteURL):#Returns a list of USPs for each site
+def findUSPs(siteURL):#Returns a list of USPs for each site
     title=getTitle(siteURL)
     USPList=[title,"",siteURL,"","",""]#Starts the list to have the url and two empty spots for the counters
     replacables=["</li>","<li>","</span>","<span>","</p>","<p>","</strong>","<strong>","""<p class="Default">""","""<span lang="EN-US">""","""<span lang="EN">""","""<span class="normaltextrun">"""]#List of stuff to be removed
@@ -63,8 +63,39 @@ def find(siteURL):#Returns a list of USPs for each site
             errorLinks.append([siteURL,"No Why choose us"])
             writer.writerow([title,"",siteURL,"""No "Why Choose us" section found"""])
     
+def getFaculty():
 
+    with open(r"C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\site.txt", "r", encoding="utf-8") as file:#Reads the file
+        
+        text=file.read()
+        
+        #Cuts out the why choose us list section
+        try:
+            result = text.split("""<span class="title">Faculty</span>""")[1]
+            result = result.split("</span>")[0]
+            faculty=result.replace("""<span class="value">""","")
+            print(faculty)
+        except:
+            faculty="Can't find faculty"
+        
+        return faculty
 
+def getSchool():
+
+    with open(r"C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\site.txt", "r", encoding="utf-8") as file:#Reads the file
+        
+        text=file.read()
+        
+        #Cuts out the why choose us list section
+        try:
+            result = text.split("""<span class="title">School</span>""")[1]
+            result = result.split("</span>")[0]
+            school=result.replace("""<span class="value">""","")
+            print(school)
+        except:
+            school="Can't find school"
+        
+        return school
 
 def getTitle(url):
     response = request.urlopen(url)#loads page
@@ -92,7 +123,9 @@ if continueInp=="y":
         else:
             if scrape(siteURL):#Gets HTML as plain text
                 print("Read HTML for site",siteURL,siteIndex,"/",linksLength)
-                find(siteURL)#Looks for phrase in HTML
+                getFaculty()
+                getSchool()
+                findUSPs(siteURL)#Looks for phrase in HTML
 
     print("-----Done scraping!-----")
 
