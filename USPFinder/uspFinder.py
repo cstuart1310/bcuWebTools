@@ -8,7 +8,7 @@ import csv
 from bs4 import BeautifulSoup
 import os
 
-outFile=open("C:\\Users\\S20103502\\Documents\\Work\Tools\\USPFinder\\output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
+outFile=open("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
 writer = csv.writer(outFile)#starts the writer
 
 headers=["Title","School","URL","Notes","No of USPs currently on page CALLUM REMOVE CODE WHEN DONE","No of USPs (Auto updates from cells)","USP 1","USP 2","USP 3","USP 4","USP 5","USP 6","USP 7","USP 8","USP 9","USP 10","USP 11","USP 12","USP 13","USP 14","USP 15","Changed by BP? (Y/N)","Change Details"]
@@ -24,7 +24,7 @@ def scrape(siteURL):
         with urllib.request.urlopen(siteURL) as url: #"Opens" URL (Gets data)
             site = url.read() #Reads the html code
             site=site.decode("utf-8")#Decodes the site
-            with io.open(r"""C:\Users\S20103502\Documents\Work\Tools\USPFinder\site.txt""", "w", encoding="utf-8") as file:#Writes the site to a file
+            with io.open(r"C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\site.txt", "w", encoding="utf-8") as file:#Writes the site to a file
                 file.write(site)
                 return True
     except (urllib.error.HTTPError, ValueError):#Error handling for invalid links
@@ -37,7 +37,7 @@ def find(siteURL):#Returns a list of USPs for each site
     title=getTitle(siteURL)
     USPList=[title,"",siteURL,"","",""]#Starts the list to have the url and two empty spots for the counters
     replacables=["</li>","<li>","</span>","<span>","</p>","<p>","</strong>","<strong>","""<p class="Default">""","""<span lang="EN-US">""","""<span lang="EN">""","""<span class="normaltextrun">"""]#List of stuff to be removed
-    with open(r"""C:\Users\S20103502\Documents\Work\Tools\USPFinder\site.txt""", "r", encoding="utf-8") as file:#Reads the file
+    with open(r"C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\site.txt", "r", encoding="utf-8") as file:#Reads the file
         
         text=file.read()
         
@@ -72,7 +72,7 @@ def getTitle(url):
 
 #Main
 
-linkFile=open(r"C:\Users\S20103502\Documents\Work\Tools\USPFinder\links.txt","r")#Opens link file
+linkFile=open(r"C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\links.txt","r")#Opens link file
 links = [link.rstrip() for link in linkFile]#Gets links from file without trailing \n
 linkFile.close()#Closes the link file for memory conservation
 linksLength=len(links)#Stored as a variable for convenience
@@ -100,7 +100,7 @@ if continueInp=="y":
         for link in errorLinks:
             print(link[0],link[1])
 
-    os.startfile("C:\\Users\\S20103502\\Documents\\Work\Tools\\USPFinder\\output.csv")#Opens the output file automatically because I'm lazy
+    os.startfile("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\output.csv")#Opens the output file automatically because I'm lazy
 
 #Quit
 elif continueInp=="n":
