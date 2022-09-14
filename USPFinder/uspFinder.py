@@ -45,27 +45,29 @@ def find(siteURL):#Returns a list of USPs for each site
         try:
             result = text.split("Why Choose Us?")[1]
             result = result.split("</ul>")[0]
-
+            
+            lineCount=0#Counter used because repeating html means cant use index to search
             for line in result.split("\n"):#Checks every line
+                
                 if "<li>" in line:#If the line is a list item
                     USPLine=line#Reassigns the variable so i dont get confused
                     if (USPLine.replace("<li>",""))=="":#If the line is empty without the <li>
-                        USPLine=result.split("\n")[result.split("\n").index(line)+1]#move to the next line which hopefully has the data
+                        USPLine=result.split("\n")[lineCount+1]#move to the next line which hopefully has the data
                         USPList[3]="Had to move to next line"
                     for replacable in replacables:#Removes all items from the list (HTML tags)
                         USPLine=USPLine.replace(replacable,"")
-                    #print(USPLine)
                     USPList.append(USPLine)#Adds the line to a list of USPs for this page
+                lineCount+=1
             writer.writerow(USPList)#Writes the USPs and the URL to a csv
         except IndexError:
             errorLinks.append([siteURL,"No Why choose us"])
             writer.writerow([title,"",siteURL,"""No "Why Choose us" section found"""])
+    
+
 
 
 def getTitle(url):
     response = request.urlopen(url)#loads page
-    code=response.status#status code
-    new_url = str(response.geturl())#gets new url
     soup = BeautifulSoup(request.urlopen(url),features="html.parser")#reads the html as soup
     title= (soup.title.string)#gets the page title from soup
     return title
