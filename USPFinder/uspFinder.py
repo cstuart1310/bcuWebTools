@@ -29,7 +29,7 @@ def scrape(siteURL):
     except (urllib.error.HTTPError, ValueError):#Error handling for invalid links
         print("Page does not exist!",siteURL)
         errorLinks.append([siteURL,"404'd"])#Adds to array to tell user broken links at end of program
-        writer.writerow(["None","",siteURL,"""Page is not public"""])
+        writer.writerow(["None",siteURL,"","","""Page is not public"""])
         return False
 
 def findUSPs(siteURL):#Returns a list of USPs for each site
