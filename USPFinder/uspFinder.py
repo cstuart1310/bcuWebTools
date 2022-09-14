@@ -114,8 +114,8 @@ if continueInp=="y":
     siteIndex=0
     for siteURL in links:#Iterates through each URL in the file
         siteIndex+=1#Counter of no of sites checked
-        if "https://" not in siteURL:#If it's a poorly thought out seperator so i can do it all at once
-            writer.writerow(siteURL)#Writes the USPs and the URL to a csv
+        if "https://" not in siteURL:#If url file contains something that isnt a url
+            print(siteURL)
         else:
             if scrape(siteURL):#Gets HTML as plain text
                 print("Read HTML for site",siteURL,siteIndex,"/",linksLength)
