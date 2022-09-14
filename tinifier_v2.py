@@ -27,8 +27,13 @@ compPath=r"C:\Users\S20103502\Documents\Work\Tools\AutoCompressed\\"
 imagesArray=[]
 errorPaths=[]
 
-widthX=900
-widthY=600
+widthX=100
+widthY=150
+
+maxImgSize=100000#Max no of bits the image size can be
+
+dirIterator=1
+moved=False
 
 
 def eraseLine(eraseVal):#Erases the number of lines passed to it
@@ -43,9 +48,18 @@ def eraseLine(eraseVal):#Erases the number of lines passed to it
 #main
 print("\n"*50)
 print("Resolution:",widthX,widthY)
-courseName=input("Course name:")
+if len(os.listdir(rawPath))==1:
+    courseName=(os.listdir(rawPath)[0].split(".")[0])
+    print(courseName)
+else:
+    print("Files:",os.listdir(rawPath))
+    courseName=input("Course name:")
 courseName=courseName.title()#Capitalizes the first letter of each word so the user doesnt have to because im lazy
 courseName=courseName.replace(" ","_")
+courseName=courseName.replace("-","_")
+courseName=courseName.replace("'","_")
+
+
 
 #Gets all files in the directory
 for listedItem in os.listdir(rawPath):
@@ -131,15 +145,15 @@ for image in imagesArray:#Every file within the dir
 
     #Changes the image JPG quality value until it is below 100kb
     correctSize=False
-    qualityValue=90#Starts by decreasing quality 10%
+    qualityValue=100#Starts at 100% quality in case the size is already good
     im = Image.open(os.path.join(resizedPath+filename))
     while correctSize==False:#loops until finds good size
         eraseLine(2)
         im.thumbnail(im.size)
         im.save((resizedPath+filename), "JPEG", quality=qualityValue, optimize=True)#Changes quality value then saves
-        if os.path.getsize(resizedPath+filename) < 100000: #If image is smaller than 100kb
+        if os.path.getsize(resizedPath+filename) < maxImgSize: #If image is smaller than max size
             correctSize=True#Break loop
-            print("Below 100kb at",qualityValue,"% quality")
+            print("Below",maxImgSize,"bytes at",qualityValue,"% quality")
             print("Size:",os.path.getsize(resizedPath+filename),"bytes")
         else:
             qualityValue=qualityValue-1#Lowers quality
@@ -181,13 +195,20 @@ for image in imagesArray:#Every file within the dir
             
 #Moves all dirs to the 'organized' folder
 courseDir=r"C:\Users\S20103502\Documents\Work\Tools\Organized\\"+courseName
-print("\nMoving dirs to",courseName)
-shutil.move(rawPath,courseDir)
-shutil.move(resizedPath,courseDir)
-shutil.move(compPath,courseDir)
-print("Moved all dirs")
-os.makedirs(rawPath)
-print("Recreated Raw folder for next use")
+while moved==False:
+    try:
+        print("\nMoving dirs to",courseName)
+        shutil.move(rawPath,courseDir)
+        shutil.move(resizedPath,courseDir)
+        shutil.move(compPath,courseDir)
+        print("Moved all dirs")
+        os.makedirs(rawPath)
+        print("Recreated Raw folder for next use")
+        moved=True
+    except shutil.Error:
+        courseDir=courseDir+"_"+str(dirIterator)
+        dirIterator+=1
+
 
 
 print("Done!")
@@ -197,3 +218,5 @@ if len(errorPaths)>0:
     for errorVal in errorPaths:
         print(errorVal[0])
         print(errorVal[1])
+
+os.startfile(courseDir+r"\\AutoCompressed")
