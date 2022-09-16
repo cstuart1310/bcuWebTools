@@ -106,6 +106,11 @@ links = [link.rstrip() for link in linkFile]#Gets links from file without traili
 linkFile.close()#Closes the link file for memory conservation
 linksLength=len(links)#Stored as a variable for convenience
 print("Found",linksLength,"links to look through")
+
+averageFile=open("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\averageTime.txt","r")
+averageTime=averageFile.read()
+if averageTime!="":
+    print("Task approximate time:",float(averageTime)*linksLength,"seconds")
 print("This might take a while, begin? y/n (CTRL + C to quit)")
 continueInp=input(">")
 
@@ -135,6 +140,12 @@ if continueInp=="y":
     print("-"*30)
     print("Scraped and outputted",linksLength,"courses in",timeTaken,"seconds")
     print("Average time per course:",timeTaken/linksLength,"seconds")
+    
+    #Writes the average to the txt for the next run
+    averageFile=open("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\averageTime.txt","w")
+    averageFile.write(str(timeTaken/linksLength))
+    averageFile.close()
+
     os.startfile("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\output.csv")#Opens the output file automatically because I'm lazy
 
 #Quit
