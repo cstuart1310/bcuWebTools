@@ -111,6 +111,8 @@ averageFile=open("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinde
 averageTime=averageFile.read()
 if averageTime!="":
     print("Task approximate time:",float(averageTime)*linksLength,"seconds")
+    if float(averageTime)*linksLength>120:
+        print("(",(float(averageTime)*linksLength)/60,"minutes)")
 print("This might take a while, begin? y/n (CTRL + C to quit)")
 continueInp=input(">")
 
@@ -124,7 +126,7 @@ if continueInp=="y":
             print(siteURL)
         else:
             if scrape(siteURL):#Gets HTML as plain text
-                print("Read HTML for site",siteURL,siteIndex,"/",linksLength)
+                print("Read HTML for site",siteURL,siteIndex,"/",linksLength, round((100/linksLength),2)*siteIndex,"%")
 
                 findUSPs(siteURL)#Looks for phrase in HTML
 
