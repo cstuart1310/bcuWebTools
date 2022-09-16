@@ -1,6 +1,6 @@
+import time #Used for timing the program to get estimates
 import urllib.request #Used to grab the html
 from urllib import request
-
 import io #Used to mess with files with weird encoding
 import time #Delays
 import re
@@ -111,6 +111,7 @@ continueInp=input(">")
 
 if continueInp=="y":
     print("---------------")
+    start = time.time()#starts the timer
     siteIndex=0
     for siteURL in links:#Iterates through each URL in the file
         siteIndex+=1#Counter of no of sites checked
@@ -123,13 +124,17 @@ if continueInp=="y":
                 findUSPs(siteURL)#Looks for phrase in HTML
 
     print("-----Done scraping!-----")
-
+    end = time.time()#Ends the timer
+    timeTaken = end - start
     
     if len(errorLinks)>0:#If there is at least one link that didn't load
         print("-----Links that errored for some reason-----")
         for link in errorLinks:
             print(link[0],link[1])
 
+    print("-"*30)
+    print("Scraped and outputted",linksLength,"courses in",timeTaken,"seconds")
+    print("Average time per course:",timeTaken/linksLength,"seconds")
     os.startfile("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\output.csv")#Opens the output file automatically because I'm lazy
 
 #Quit
