@@ -4,8 +4,8 @@ from urllib import request
 import io #Used to mess with files with weird encoding
 import time #Delays
 import re
-import csv
-from bs4 import BeautifulSoup
+import csv#Used to write the info into a csv
+from bs4 import BeautifulSoup #Used just to parse the title of the page
 import os
 
 outFile=open("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
@@ -17,7 +17,7 @@ foundCount=0
 foundLinks=[]
 errorLinks=[]
 
-def scrape(siteURL):
+def scrape(siteURL):#Gets the source code of the page and writes it into a text file
     #Gets html
     try:
         with urllib.request.urlopen(siteURL) as url: #"Opens" URL (Gets data)
@@ -29,7 +29,7 @@ def scrape(siteURL):
     except (urllib.error.HTTPError, ValueError):#Error handling for invalid links
         print("Page does not exist!",siteURL)
         errorLinks.append([siteURL,"404'd"])#Adds to array to tell user broken links at end of program
-        writer.writerow(["None",siteURL,"","","""Page is not public"""])
+        writer.writerow(["None",siteURL,"","","""Page is not public"""])#Writes the error into the csv
         return False
 
 def findUSPs(siteURL):#Returns a list of USPs for each site
@@ -59,9 +59,9 @@ def findUSPs(siteURL):#Returns a list of USPs for each site
             writer.writerow(USPList)#Writes the USPs and the URL to a csv
         except IndexError:
             errorLinks.append([siteURL,"No Why choose us"])
-            writer.writerow([getTitle(siteURL),siteURL,getFaculty(),getSchool(),"""No "Why Choose us" section found"""])
+            writer.writerow([getTitle(siteURL),siteURL,getFaculty(),getSchool(),"""No "Why Choose us" section found"""])#Writes the error to the csv
     
-def getFaculty():
+def getFaculty():#Gets the faculty name from the site file
 
     with open(r"C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\site.txt", "r", encoding="utf-8") as file:#Reads the file
         
@@ -74,10 +74,9 @@ def getFaculty():
             faculty=result.replace("""<span class="value">""","")
         except:
             faculty="Can't find faculty"
-        
         return faculty
 
-def getSchool():
+def getSchool():#Gets the school name from the site file
 
     with open(r"C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\site.txt", "r", encoding="utf-8") as file:#Reads the file
         
@@ -90,10 +89,9 @@ def getSchool():
             school=result.replace("""<span class="value">""","")
         except:
             school="Can't find school"
-        
         return school
 
-def getTitle(url):
+def getTitle(url):#Gets the title from the url
     response = request.urlopen(url)#loads page
     soup = BeautifulSoup(request.urlopen(url),features="html.parser")#reads the html as soup
     title= (soup.title.string)#gets the page title from soup
@@ -107,32 +105,32 @@ linkFile.close()#Closes the link file for memory conservation
 linksLength=len(links)#Stored as a variable for convenience
 print("Found",linksLength,"links to look through")
 
-averageFile=open("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\averageTime.txt","r")
-averageTime=averageFile.read()
-if averageTime!="":
-    print("Task approximate time:",float(averageTime)*linksLength,"seconds")
-    if float(averageTime)*linksLength>120:
-        print("(",(float(averageTime)*linksLength)/60,"minutes)")
+averageFile=open("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\averageTime.txt","r")#opens the file containing the previous average value
+averageTime=averageFile.read()#reads the prev average value
+if averageTime!="":#If there is data
+    print("Task approximate time:",float(averageTime)*linksLength,"seconds")#Converts the average time from a str to a float
+    if float(averageTime)*linksLength>120:#If the estimated time is more than 2 mins
+        print("(",(float(averageTime)*linksLength)/60,"minutes)")#Prints the estimated time converted into minutes
 print("This might take a while, begin? y/n (CTRL + C to quit)")
-continueInp=input(">")
+continueInp=input(">")#Doesn't immediately begin due to long processing time needed
 
-if continueInp=="y":
+if continueInp=="y":#Confirm start
     print("---------------")
     start = time.time()#starts the timer
-    siteIndex=0
+    siteIndex=0#Index 0 for the pos of the site url in the list
     for siteURL in links:#Iterates through each URL in the file
         siteIndex+=1#Counter of no of sites checked
         if "https://" not in siteURL:#If url file contains something that isnt a url
             print(siteURL)
         else:
             if scrape(siteURL):#Gets HTML as plain text
-                print("Read HTML for site",siteURL,siteIndex,"/",linksLength, round((100/linksLength),2)*siteIndex,"%")
+                print("Read HTML for site",siteURL,siteIndex,"/",linksLength, round((100/linksLength),2)*siteIndex,"%")#Prints the url, index/listsize, %done
 
                 findUSPs(siteURL)#Looks for phrase in HTML
 
     print("-----Done scraping!-----")
     end = time.time()#Ends the timer
-    timeTaken = end - start
+    timeTaken = end - start#Gets the time it took to scrape and process everything
     
     if len(errorLinks)>0:#If there is at least one link that didn't load
         print("-----Links that errored for some reason-----")
@@ -140,10 +138,10 @@ if continueInp=="y":
             print(link[0],link[1])
 
     print("-"*30)
-    print("Scraped and outputted",linksLength,"courses in",timeTaken,"seconds")
-    print("Average time per course:",timeTaken/linksLength,"seconds")
+    print("Scraped and outputted",linksLength,"courses in",timeTaken,"seconds")#Outputs time taken
+    print("Average time per course:",timeTaken/linksLength,"seconds")#Outputs average time per course
     
-    #Writes the average to the txt for the next run
+    #Writes the average to the txt for the next run to make an estimate
     averageFile=open("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\averageTime.txt","w")
     averageFile.write(str(timeTaken/linksLength))
     averageFile.close()
