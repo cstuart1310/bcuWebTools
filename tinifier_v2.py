@@ -174,7 +174,7 @@ for image in imagesArray:#Every file within the dir
             originalSize=os.path.getsize(resizedPath+filename)
             source.to_file(compPath+filename)
             print("Compressed image successfully")
-            print("Bytes saved after Tinifying:",(originalSize-os.path.getsize(compPath+filename)))
+            print("Kilobytes saved after Tinifying:",(originalSize-os.path.getsize(compPath+filename))/1000,"kb")
             isCompressed=True
         except tinify.errors.AccountError:
             print("RUN OUT OF COMPRESSIONS THIS MONTH, CHANGING KEY")
