@@ -118,11 +118,11 @@ for image in imagesArray:#Every file within the dir
     isResized=False
     while isResized==False:
         for widthX,widthY in resolutions:
-            print("Resizing",filename,"via tinify.\nX:",widthX,"\nY:",widthY)
+            print("\nResizing",filename,"via tinify.\nX:",widthX,"\nY:",widthY)
             try:
                 source = tinify.from_file(JpgPath)
                 resized = source.resize(method="cover",width=widthX,height=widthY)
-                filename=(str(widthX)+"x"+str(widthY)+"_"+filename)
+                filename=(str(widthX)+"x_"+str(widthY)+"_"+filename)
                 resized.to_file(resizedPath+filename)
                 print("Resized image successfully:",filename)
                 isResized=True
@@ -142,57 +142,57 @@ for image in imagesArray:#Every file within the dir
                     errorPaths.append([(resizedPath+filename),e])
                 print("Skipping this one because it won't work")
             
-    print("\n"*3)
 
-    #Changes the image JPG quality value until it is below 100kb
-    correctSize=False
-    qualityValue=100#Starts at 100% quality in case the size is already good
-    im = Image.open(os.path.join(resizedPath+filename))
-    while correctSize==False:#loops until finds good size
-        eraseLine(2)
-        im.thumbnail(im.size)
-        im.save((resizedPath+filename), "JPEG", quality=qualityValue, optimize=True)#Changes quality value then saves
-        if os.path.getsize(resizedPath+filename) < maxImgSize: #If image is smaller than max size
-            correctSize=True#Break loop
-            print("Below",maxImgSize,"bytes at",qualityValue,"% quality")
-            print("Size:",os.path.getsize(resizedPath+filename),"bytes")
-        else:
-            qualityValue=qualityValue-1#Lowers quality
-            if qualityValue<1:#Makes sure the quality doesn't go below 1 because idk what will happen
-                qualityValue=1
-            print("Size is",os.path.getsize(resizedPath+filename))
-            print("Quality:"+str(qualityValue)+"%")
-            time.sleep(0.05)
+            #Changes the image JPG quality value until it is below 100kb
+            
+            correctSize=False
+            qualityValue=100#Starts at 100% quality in case the size is already good
+            im = Image.open(os.path.join(resizedPath+filename))
+            while correctSize==False:#loops until finds good size
+                eraseLine(2)
+                im.thumbnail(im.size)
+                im.save((resizedPath+filename), "JPEG", quality=qualityValue, optimize=True)#Changes quality value then saves
+                if os.path.getsize(resizedPath+filename) < maxImgSize: #If image is smaller than max size
+                    correctSize=True#Break loop
+                    print("Below",maxImgSize,"bytes at",qualityValue,"% quality")
+                    print("Size:",os.path.getsize(resizedPath+filename),"bytes")
+                else:
+                    qualityValue=qualityValue-1#Lowers quality
+                    if qualityValue<1:#Makes sure the quality doesn't go below 1 because idk what will happen
+                        qualityValue=1
+                    print("Size is",os.path.getsize(resizedPath+filename))
+                    print("Quality:"+str(qualityValue)+"%")
+                    time.sleep(0.05)
 
 
-        #Compresses the image even further using tinify
-    print("Compressing image via tinify")
-    retryCount=0
-    isCompressed=False
-    while isCompressed==False:
-        try:
-            source = tinify.from_file(resizedPath+filename)
-            originalSize=os.path.getsize(resizedPath+filename)
-            source.to_file(compPath+filename)
-            print("Compressed image successfully")
-            print("Bytes saved after Tinifying:",(originalSize-os.path.getsize(compPath+filename)))
-            isCompressed=True
-        except tinify.errors.AccountError:
-            print("RUN OUT OF COMPRESSIONS THIS MONTH, CHANGING KEY")
-            tinyKeyVal+=1
-            print("Key Value:",tinyKeyVal)
-            tinify.key = tinyKeys[tinyKeyVal]
-        except tinify.errors.ClientError as e:
-            print("!!!!!!!!!!!!!!")
-            print("Broke somehow")
-            print("How it broke:",e)
-            print("File:",resizedPath+filename)
-            retryCount+=1
-            if retryCount>5:
-                isCompressed=True
-                errorPaths.append([(resizedPath+filename),e])
-                print("Skipping this one because it won't work")
-        
+                #Compresses the image even further using tinify
+            print("Compressing image via tinify")
+            retryCount=0
+            isCompressed=False
+            while isCompressed==False:
+                try:
+                    source = tinify.from_file(resizedPath+filename)
+                    originalSize=os.path.getsize(resizedPath+filename)
+                    source.to_file(compPath+filename)
+                    print("Compressed image successfully")
+                    print("Bytes saved after Tinifying:",(originalSize-os.path.getsize(compPath+filename)))
+                    isCompressed=True
+                except tinify.errors.AccountError:
+                    print("RUN OUT OF COMPRESSIONS THIS MONTH, CHANGING KEY")
+                    tinyKeyVal+=1
+                    print("Key Value:",tinyKeyVal)
+                    tinify.key = tinyKeys[tinyKeyVal]
+                except tinify.errors.ClientError as e:
+                    print("!!!!!!!!!!!!!!")
+                    print("Broke somehow")
+                    print("How it broke:",e)
+                    print("File:",resizedPath+filename)
+                    retryCount+=1
+                    if retryCount>5:
+                        isCompressed=True
+                        errorPaths.append([(resizedPath+filename),e])
+                        print("Skipping this one because it won't work")
+                
             
 #Moves all dirs to the 'organized' folder
 courseDir=r"C:\Users\S20103502\Documents\Work\Tools\Organized\\"+courseName
