@@ -8,7 +8,10 @@ import csv#Used to write the info into a csv
 from bs4 import BeautifulSoup #Used just to parse the title of the page
 import os
 
-outFile=open("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
+root=open("root.txt","r").readline()
+print("Root Dir:",root)
+
+outFile=open(root+"\output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
 writer = csv.writer(outFile)#starts the writer
 headers=["Title","URL","Faculty","School","Notes","No of USPs currently on page CALLUM REMOVE CODE WHEN DONE","No of USPs (Auto updates from cells)","USP 1","USP 2","USP 3","USP 4","USP 5","USP 6","USP 7","USP 8","USP 9","USP 10","USP 11","USP 12","USP 13","USP 14","USP 15","Changed by BP? (Y/N)","Change Details"]
 writer.writerow(headers)#Writes the headers at the top of the spreadsheet
@@ -23,7 +26,7 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
         with urllib.request.urlopen(siteURL) as url: #"Opens" URL (Gets data)
             site = url.read() #Reads the html code
             site=site.decode("utf-8")#Decodes the site
-            with io.open(r"C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\site.txt", "w", encoding="utf-8") as file:#Writes the site to a file
+            with io.open(root+"\site.txt", "w", encoding="utf-8") as file:#Writes the site to a file
                 file.write(site)
                 return True
     except (urllib.error.HTTPError, ValueError):#Error handling for invalid links
@@ -35,7 +38,7 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
 def findUSPs(siteURL):#Returns a list of USPs for each site
     USPList=[getTitle(siteURL),siteURL,getFaculty(),getSchool(),"","",""]#Starts the list to have the url and two empty spots for the counters
     replacables=["</li>","<li>","</span>","<span>","</p>","<p>","</strong>","<strong>","""<p class="Default">""","""<span lang="EN-US">""","""<span lang="EN">""","""<span class="normaltextrun">"""]#List of stuff to be removed
-    with open(r"C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\site.txt", "r", encoding="utf-8") as file:#Reads the file
+    with open(root+"\site.txt", "r", encoding="utf-8") as file:#Reads the file
         
         text=file.read()
         
@@ -63,7 +66,7 @@ def findUSPs(siteURL):#Returns a list of USPs for each site
     
 def getFaculty():#Gets the faculty name from the site file
 
-    with open(r"C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\site.txt", "r", encoding="utf-8") as file:#Reads the file
+    with open(root+"\site.txt", "r", encoding="utf-8") as file:#Reads the file
         
         text=file.read()
         
@@ -78,7 +81,7 @@ def getFaculty():#Gets the faculty name from the site file
 
 def getSchool():#Gets the school name from the site file
 
-    with open(r"C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\site.txt", "r", encoding="utf-8") as file:#Reads the file
+    with open(root+"\site.txt", "r", encoding="utf-8") as file:#Reads the file
         
         text=file.read()
         
@@ -99,13 +102,13 @@ def getTitle(url):#Gets the title from the url
 
 #Main
 
-linkFile=open(r"C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\links.txt","r")#Opens link file
+linkFile=open(root+"\links.txt","r")#Opens link file
 links = [link.rstrip() for link in linkFile]#Gets links from file without trailing \n
 linkFile.close()#Closes the link file for memory conservation
 linksLength=len(links)#Stored as a variable for convenience
 print("Found",linksLength,"links to look through")
 
-averageFile=open("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\averageTime.txt","r")#opens the file containing the previous average value
+averageFile=open(root+"\averageTime.txt","r")#opens the file containing the previous average value
 averageTime=averageFile.read()#reads the prev average value
 if averageTime!="":#If there is data
     print("Task approximate time:",float(averageTime)*linksLength,"seconds")#Converts the average time from a str to a float
@@ -142,11 +145,11 @@ if continueInp=="y":#Confirm start
     print("Average time per course:",timeTaken/linksLength,"seconds")#Outputs average time per course
     
     #Writes the average to the txt for the next run to make an estimate
-    averageFile=open("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\averageTime.txt","w")
+    averageFile=open(root+"\averageTime.txt","w")
     averageFile.write(str(timeTaken/linksLength))
     averageFile.close()
 
-    os.startfile("C:\\Users\\S20103502\\Documents\\GitHub\\bcuWebTools\\USPFinder\\output.csv")#Opens the output file automatically because I'm lazy
+    os.startfile(root+"\output.csv")#Opens the output file automatically because I'm lazy
 
 #Quit
 elif continueInp=="n":
