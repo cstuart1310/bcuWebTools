@@ -22,6 +22,8 @@ foundCount=0
 foundLinks=[]
 errorLinks=[]
 
+possibleReplacable=[]#List to warn user of possible lines that need to be replaced
+
 def scrape(siteURL):#Gets the source code of the page and writes it into a text file
     #Gets html
     try:
@@ -58,6 +60,8 @@ def findUSPs(siteURL):#Returns a list of USPs for each site
                         USPList[4]="Had to move to next line"
                     for replacable in replacables:#Removes all items from the list (HTML tags)
                         USPLine=USPLine.replace(replacable,"")
+                    if "<" in USPLine or ">" in USPLine:
+                        possibleReplacable.append(USPLine)
                     USPList.append(USPLine)#Adds the line to a list of USPs for this page
                 lineCount+=1
             writer.writerow(USPList)#Writes the USPs and the URL to a csv
@@ -148,7 +152,13 @@ if continueInp=="y":#Confirm start
 
     print("-"*30)
     print("Scraped and outputted",linksLength,"courses in",timeTaken,"seconds")#Outputs time taken
+
+    print("\n"*2,"Stats")
+    print("Est time:",float(averageTime)*linksLength,"seconds")
+    print("Actual time:",timeTaken,"seconds")
     print("Average time per course:",timeTaken/linksLength,"seconds")#Outputs average time per course
+    print("\nFound",len(possibleReplacable),"phrases that possibly need replacing:")
+    print(possibleReplacable)
     
     #Writes the average to the txt for the next run to make an estimate
     averageFile=open(root+"averageTime.txt","w")
