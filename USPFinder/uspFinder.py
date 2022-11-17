@@ -12,6 +12,8 @@ root=open("root.txt","r").readline()
 print("Root Dir:",root)
 
 outFile=open(root+"output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
+
+
 writer = csv.writer(outFile)#starts the writer
 headers=["Title","URL","Faculty","School","Notes","No of USPs currently on page CALLUM REMOVE CODE WHEN DONE","No of USPs (Auto updates from cells)","USP 1","USP 2","USP 3","USP 4","USP 5","USP 6","USP 7","USP 8","USP 9","USP 10","USP 11","USP 12","USP 13","USP 14","USP 15","Changed by BP? (Y/N)","Change Details"]
 writer.writerow(headers)#Writes the headers at the top of the spreadsheet
@@ -37,7 +39,6 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
 
 def findUSPs(siteURL):#Returns a list of USPs for each site
     USPList=[getTitle(siteURL),siteURL,getFaculty(),getSchool(),"","",""]#Starts the list to have the url and two empty spots for the counters
-    replacables=["</li>","<li>","</span>","<span>","</p>","<p>","</strong>","<strong>","""<p class="Default">""","""<span lang="EN-US">""","""<span lang="EN">""","""<span class="normaltextrun">"""]#List of stuff to be removed
     with open(root+"site.txt", "r", encoding="utf-8") as file:#Reads the file
         
         text=file.read()
@@ -107,6 +108,11 @@ links = [link.rstrip() for link in linkFile]#Gets links from file without traili
 linkFile.close()#Closes the link file for memory conservation
 linksLength=len(links)#Stored as a variable for convenience
 print("Found",linksLength,"links to look through")
+
+replacables=[replacable.rstrip() for replacable in open(root+"replacables.txt","r").readlines()]#Gets links from file without trailing \n
+print("Replacables:",replacables)
+
+
 
 averageFile=open(root+"averageTime.txt","r")#opens the file containing the previous average value
 averageTime=averageFile.read()#reads the prev average value
