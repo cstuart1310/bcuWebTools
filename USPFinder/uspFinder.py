@@ -137,7 +137,8 @@ if continueInp=="y":#Confirm start
             print(siteURL)
         else:
             if scrape(siteURL):#Gets HTML as plain text
-                print("Read HTML for site",siteURL,siteIndex,"/",linksLength, round(((100/linksLength)*siteIndex),2),"%")#Prints the url, index/listsize, %done
+                printLine=("Read HTML for site:"+siteURL)
+                print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")
 
                 findUSPs(siteURL)#Looks for phrase in HTML
 
