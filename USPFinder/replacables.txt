@@ -30,4 +30,7 @@
 <span data-contrast="auto" class="TextRun SCXW266871239 BCX0" xml:lang="EN-US" lang="EN-US">
 <span class="TextRun SCXW82599654 BCX3" lang="EN-GB" xml:lang="EN-GB" data-contrast="autoState-of-the-art course">
 <span class="TextRun SCXW82599654 BCX3" lang="EN-GB" xml:lang="EN-GB" data-contrast="autocontent">
+" target="_blank
+target="_blank
 ">
+| Birmingham City University
