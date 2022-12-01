@@ -8,7 +8,7 @@ import csv#Used to write the info into a csv
 from bs4 import BeautifulSoup #Used just to parse the title of the page
 import os
 
-root=open("root.txt","r").readline()
+root=os.path.dirname(os.path.abspath(__file__))+"\\"
 print("Root Dir:",root)
 
 outFile=open(root+"output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
