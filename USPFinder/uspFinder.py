@@ -80,6 +80,8 @@ def getFaculty():#Gets the faculty name from the site file
             result = text.split("""<span class="title">Faculty</span>""")[1]
             result = result.split("</span>")[0]
             faculty=result.replace("""<span class="value">""","")
+            faculty=result.replace("\n","")
+
         except:
             faculty="Can't find faculty"
         return faculty
@@ -94,7 +96,7 @@ def getSchool():#Gets the school name from the site file
         try:
             result = text.split("""<span class="title">School</span>""")[1]
             result = result.split("</span>")[0]
-            school=result.replace("""<span class="value">""","")
+            school=result.replace("\n","")
         except:
             school="Can't find school"
         return school
