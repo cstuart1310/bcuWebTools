@@ -123,10 +123,10 @@ print("Replacables:",replacables)
 averageFile=open(root+"averageTime.txt","r")#opens the file containing the previous average value
 averageTime=averageFile.read()#reads the prev average value
 if averageTime!="":#If there is data
-    print("Task approximate time:",float(averageTime)*linksLength,"seconds")#Converts the average time from a str to a float
+    print("Task approximate time:",round((float(averageTime)*linksLength),1),"seconds ",end="")#Converts the average time from a str to a float
     if float(averageTime)*linksLength>120:#If the estimated time is more than 2 mins
-        print("(",(float(averageTime)*linksLength)/60,"minutes)")#Prints the estimated time converted into minutes
-print("This might take a while, begin? y/n (CTRL + C to quit)")
+        print("("+str(round((float(averageTime)*linksLength)/60,1))+" minutes)")#Prints the estimated time converted into minutes
+print("\nThis might take a while, begin? y/n (CTRL + C to quit)")
 continueInp=input(">")#Doesn't immediately begin due to long processing time needed
 
 if continueInp=="y":#Confirm start
