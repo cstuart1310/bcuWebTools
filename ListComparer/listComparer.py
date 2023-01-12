@@ -18,12 +18,15 @@ dontMatches=[]
 print("List A contains",len(listA),"items")
 print("List B contains",len(listB),"items")
 
+ignoreList=["\n"]#List of items to not add to comparison output
+
 print("Checking for matches")
 for itemA in listA:
     for itemB in listB:
         if itemB==itemA:
-            matches.append(itemA)
-            matchesFile.write(str(itemA))
+            if itemA not in ignoreList:
+                matches.append(itemA)
+                matchesFile.write(str(itemA))
 
 
 
