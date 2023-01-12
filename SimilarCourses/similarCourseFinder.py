@@ -110,7 +110,7 @@ def getSchool():#Gets the school name from the site file
         return school
 
 def getTitle(url):#Gets the title from the url
-    response = request.urlopen(url)#loads page
+    #response = request.urlopen(url)#loads page
     soup = BeautifulSoup(request.urlopen(url),features="html.parser")#reads the html as soup
     title= (soup.title.string)#gets the page title from soup
     return title
