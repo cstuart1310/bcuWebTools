@@ -70,6 +70,7 @@ def findUSPs(siteURL):#Returns a list of USPs for each site
             writer.writerow([getTitle(siteURL),siteURL,getFaculty(),getSchool(),"""No "Why Choose us" section found"""])#Writes the error to the csv
     
 def getFaculty():#Gets the faculty name from the site file
+    facultyReplacables=["""                    <span class="value">""","""                    ""","\n"]
 
     with open(root+"site.txt", "r", encoding="utf-8") as file:#Reads the file
         
@@ -80,14 +81,16 @@ def getFaculty():#Gets the faculty name from the site file
             result = text.split("""<span class="title">Faculty</span>""")[1]
             result = result.split("</span>")[0]
             faculty=result.replace("""<span class="value">""","")
-            faculty=result.replace("\n","")
+            faculty=result
+            for replacable in facultyReplacables:
+                faculty=faculty.replace(replacable,"")
 
         except:
             faculty="Can't find faculty"
         return faculty
 
 def getSchool():#Gets the school name from the site file
-
+    schoolReplacables=["""                    <span class="value">""","""                    ""","\n"]
     with open(root+"site.txt", "r", encoding="utf-8") as file:#Reads the file
         
         text=file.read()
@@ -96,7 +99,9 @@ def getSchool():#Gets the school name from the site file
         try:
             result = text.split("""<span class="title">School</span>""")[1]
             result = result.split("</span>")[0]
-            school=result.replace("\n","")
+            school=result
+            for replacable in schoolReplacables:
+                school=school.replace(replacable,"")
         except:
             school="Can't find school"
         return school
