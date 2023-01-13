@@ -49,6 +49,7 @@ def findUSPs(siteURL,site):#Returns a list of USPs for each site
     try:
         result = text.split("Similar Courses")[1]
         result = result.split("</ul>")[0]
+        result=re.sub("[0-9]\n","",result)#Fixes random line breaks ending in numbers
         lineCount=0#Counter used because repeating html means cant use index to search
         for line in result.split("\n"):#Checks every line
             
