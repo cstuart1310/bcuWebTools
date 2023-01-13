@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup #Used just to parse the title of the page
 import os
 
 print("-"*30)
+from concurrent.futures import ThreadPoolExecutor, wait
 root=os.path.dirname(os.path.abspath(__file__))+"\\"
 print("Root Dir:",root)
 
@@ -31,49 +32,44 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
         with urllib.request.urlopen(siteURL) as url: #"Opens" URL (Gets data)
             site = url.read() #Reads the html code
             site=site.decode("utf-8")#Decodes the site
-            with io.open(root+"site.txt", "w", encoding="utf-8") as file:#Writes the site to a file
-                file.write(site)
-                return True
+            return site
     except (urllib.error.HTTPError, ValueError):#Error handling for invalid links
         print("Page does not exist!",siteURL)
         errorLinks.append([siteURL,"404'd"])#Adds to array to tell user broken links at end of program
         writer.writerow(["None",siteURL,"","","""Page is not public"""])#Writes the error into the csv
         return False
 
-def findUSPs(siteURL):#Returns a list of USPs for each site
+def findUSPs(siteURL,site):#Returns a list of USPs for each site
     global similarCounter # Cba to return val
     USPList=[getTitle(siteURL),siteURL,getFaculty(),getSchool(),"","",""]#Starts the list to have the url and two empty spots for the counters
-    with open(root+"site.txt", "r", encoding="utf-8") as file:#Reads the file
-        
-        text=file.read()
-        
-        #Cuts out the why choose us list section
-        try:
-            result = text.split("Similar Courses")[1]#All code after this phrase
-            #result = result.split("</ul>")[0]
-            lineCount=0#Counter used because repeating html means cant use index to search
-            for line in result.split("\n"):#Checks every line
+    text=site        
+    #Cuts out the why choose us list section
+    try:
+        result = text.split("Similar Courses")[1]
+        result = result.split("</ul>")[0]
+        lineCount=0#Counter used because repeating html means cant use index to search
+        for line in result.split("\n"):#Checks every line
+            
+            if "<li>" in line:#If the line is a list item
+                USPLine=line#Reassigns the variable so i dont get confused
+                similarCounter=similarCounter+1
+                if (USPLine.replace("<li>",""))=="":#If the line is empty without the <li>
+                    USPLine=result.split("\n")[lineCount+1]#move to the next line which hopefully has the data
+                    USPList[4]="Had to move to next line"
                 
-                if "<li>" in line:#If the line is a list item
-                    USPLine=line#Reassigns the variable so i dont get confused
-                    similarCounter=similarCounter+1
-                    if (USPLine.replace("<li>",""))=="":#If the line is empty without the <li>
-                        USPLine=result.split("\n")[lineCount+1]#move to the next line which hopefully has the data
-                        USPList[4]="Had to move to next line"
-                    
-                    #USPLine=re.sub('("(.*?)")'," ",USPLine)#Removes all text in quotes (Could put in a txt but lazy)
-                    USPLine=re.findall('(?<=</span>)(.*?)(?=</a)',USPLine)[0]#Removes all tags leaving (hopefully) just the course name
-                    #for replacable in replacables:#Removes all items from the list (HTML tags)
-                        #USPLine=USPLine.replace(replacable,"")
-                    
-                    if "<" in USPLine or ">" in USPLine:
-                        possibleReplacable.append(USPLine)#Adds to a list to maybe add to replacable file
-                    USPList.append(USPLine)#Adds the line to a list of USPs for this page
-                lineCount+=1
-            writer.writerow(USPList)#Writes the USPs and the URL to a csv
-        except IndexError:
-            errorLinks.append([siteURL,"No Why choose us"])
-            writer.writerow([getTitle(siteURL),siteURL,getFaculty(),getSchool(),"""No "Why Choose us" section found"""])#Writes the error to the csv
+                USPLine=re.sub('("(.*?)")'," ",USPLine)#Removes all text in quotes (Could put in a txt but lazy)
+                USPLine=re.findall('(?<=</span>)(.*?)(?=</a)',USPLine)[0]#Removes all text in quotes (Could put in a txt but lazy)
+                for replacable in replacables:#Removes all items from the list (HTML tags)
+                    USPLine=USPLine.replace(replacable,"")
+                
+                if "<" in USPLine or ">" in USPLine:
+                    possibleReplacable.append(USPLine)#Adds to a list to maybe add to replacable file
+                USPList.append(USPLine)#Adds the line to a list of USPs for this page
+            lineCount+=1
+        writer.writerow(USPList)#Writes the USPs and the URL to a csv
+    except IndexError:
+        errorLinks.append([siteURL,"No Why choose us"])
+        writer.writerow([getTitle(siteURL),siteURL,getFaculty(),getSchool(),"""No "Why Choose us" section found"""])#Writes the error to the csv
     
 def getFaculty():#Gets the faculty name from the site file
     facultyReplacables=["""                    <span class="value">""","""                    ""","\n"]
@@ -118,6 +114,19 @@ def getTitle(url):#Gets the title from the url
     title= (soup.title.string)#gets the page title from soup
     return title
 
+def initScrape(siteURL):
+    global siteIndex
+    siteIndex+=1#Counter of no of sites checked
+    if "https://" not in siteURL:#If url file contains something that isnt a url
+        print(siteURL)
+    else:
+        site=scrape(siteURL)#Gets HTML as plain text
+        printLine=("Read HTML for site:"+siteURL)
+        print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")
+        findUSPs(siteURL,site)#Looks for phrase in HTML
+
+
+
 #Main
 
 linkFile=open(root+"links.txt","r")#Opens link file
@@ -142,18 +151,14 @@ continueInp=input(">")#Doesn't immediately begin due to long processing time nee
 
 if continueInp=="y":#Confirm start
     print("---------------")
+    futures=[]
     start = time.time()#starts the timer
     siteIndex=0#Index 0 for the pos of the site url in the list
-    for siteURL in links:#Iterates through each URL in the file
-        siteIndex+=1#Counter of no of sites checked
-        if "https://" not in siteURL:#If url file contains something that isnt a url
-            print(siteURL)
-        else:
-            if scrape(siteURL):#Gets HTML as plain text
-                printLine=("Read HTML for site:"+siteURL)
-                print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")
+    with ThreadPoolExecutor() as executor:
+        for siteURL in links:#Iterates through each URL in the file
+            futures.append(executor.submit(initScrape, siteURL))
 
-                findUSPs(siteURL)#Looks for phrase in HTML
+    wait(futures)
 
     print("-----Done scraping!-----")
     end = time.time()#Ends the timer
