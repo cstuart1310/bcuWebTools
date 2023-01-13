@@ -49,8 +49,8 @@ def findUSPs(siteURL):#Returns a list of USPs for each site
         
         #Cuts out the why choose us list section
         try:
-            result = text.split("Similar Courses")[1]
-            result = result.split("</ul>")[0]
+            result = text.split("Similar Courses")[1]#All code after this phrase
+            #result = result.split("</ul>")[0]
             lineCount=0#Counter used because repeating html means cant use index to search
             for line in result.split("\n"):#Checks every line
                 
