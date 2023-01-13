@@ -56,7 +56,7 @@ def findUSPs(siteURL,site):#Returns a list of USPs for each site
         lineCount=0#Counter used because repeating html means cant use index to search
         for line in result.split("\n"):#Checks every line
             
-            if "<li>" in line:#If the line is a list item
+            if "<li>" in line or "<p>" in line:#If the line is a list item (Or p tag because these things arent consistent)
                 USPLine=line#Reassigns the variable so i dont get confused
                 similarCounter=similarCounter+1
                 if (USPLine.replace("<li>",""))=="":#If the line is empty without the <li>
