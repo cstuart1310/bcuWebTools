@@ -13,7 +13,9 @@ from concurrent.futures import ThreadPoolExecutor, wait
 root=os.path.dirname(os.path.abspath(__file__))+"\\"
 print("Root Dir:",root)
 
+
 outFile=open(root+"output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
+
 
 writer = csv.writer(outFile)#starts the writer
 headers=["Title","URL","Faculty","School","Notes","No of similar courses currently on page CALLUM REMOVE CODE WHEN DONE","No of similar courses (Auto updates from cells)","Similar Course 1","Similar Course 2","Similar Course 3","Similar Course 4","Similar Course 5","Similar Course 6","Similar Course 7","Similar Course 8","Similar Course 9","Similar Course 10","Similar Course 11","Similar Course 12","Similar Course 13","Similar Course 14","Similar Course 15","Changed by BP? (Y/N)","Change Details"]
@@ -56,14 +58,8 @@ def findUSPs(siteURL,site):#Returns a list of USPs for each site
                 if (USPLine.replace("<li>",""))=="":#If the line is empty without the <li>
                     USPLine=result.split("\n")[lineCount+1]#move to the next line which hopefully has the data
                     USPList[4]="Had to move to next line"
-                
-                USPLine=re.sub('("(.*?)")'," ",USPLine)#Removes all text in quotes (Could put in a txt but lazy)
-                USPLine=re.findall('(?<=</span>)(.*?)(?=</a)',USPLine)[0]#Removes all text in quotes (Could put in a txt but lazy)
-                for replacable in replacables:#Removes all items from the list (HTML tags)
-                    USPLine=USPLine.replace(replacable,"")
-                
-                if "<" in USPLine or ">" in USPLine:
-                    possibleReplacable.append(USPLine)#Adds to a list to maybe add to replacable file
+                USPLine=USPLine.replace("</span>","")#Removes spans so that course names can consistently be regexed out even with inconsistent code
+                USPLine=re.findall(r'">([^<]+)</a>',USPLine)#Finds the course name (Filters for a-z after ">  )
                 USPList.append(USPLine)#Adds the line to a list of USPs for this page
             lineCount+=1
         writer.writerow(USPList)#Writes the USPs and the URL to a csv
