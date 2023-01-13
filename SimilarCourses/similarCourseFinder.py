@@ -8,6 +8,7 @@ import csv#Used to write the info into a csv
 from bs4 import BeautifulSoup #Used just to parse the title of the page
 import os
 
+print("-"*30)
 root=os.path.dirname(os.path.abspath(__file__))+"\\"
 print("Root Dir:",root)
 
@@ -126,7 +127,7 @@ linksLength=len(links)#Stored as a variable for convenience
 print("Found",linksLength,"links to look through")
 
 replacables=[replacable.rstrip() for replacable in open(root+"replacables.txt","r").readlines()]#Gets links from file without trailing \n
-print("Replacables:",replacables)
+#print("Replacables:",replacables)
 
 
 
