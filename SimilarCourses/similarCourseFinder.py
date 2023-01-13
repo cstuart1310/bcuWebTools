@@ -61,10 +61,10 @@ def findUSPs(siteURL):#Returns a list of USPs for each site
                         USPLine=result.split("\n")[lineCount+1]#move to the next line which hopefully has the data
                         USPList[4]="Had to move to next line"
                     
-                    USPLine=re.sub('("(.*?)")'," ",USPLine)#Removes all text in quotes (Could put in a txt but lazy)
-                    USPLine=re.findall('(?<=</span>)(.*?)(?=</a)',USPLine)[0]#Removes all text in quotes (Could put in a txt but lazy)
-                    for replacable in replacables:#Removes all items from the list (HTML tags)
-                        USPLine=USPLine.replace(replacable,"")
+                    #USPLine=re.sub('("(.*?)")'," ",USPLine)#Removes all text in quotes (Could put in a txt but lazy)
+                    USPLine=re.findall('(?<=</span>)(.*?)(?=</a)',USPLine)[0]#Removes all tags leaving (hopefully) just the course name
+                    #for replacable in replacables:#Removes all items from the list (HTML tags)
+                        #USPLine=USPLine.replace(replacable,"")
                     
                     if "<" in USPLine or ">" in USPLine:
                         possibleReplacable.append(USPLine)#Adds to a list to maybe add to replacable file
