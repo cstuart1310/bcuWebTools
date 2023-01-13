@@ -13,11 +13,11 @@ print("Root Dir:",root)
 
 outFile=open(root+"output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
 
-
 writer = csv.writer(outFile)#starts the writer
 headers=["Title","URL","Faculty","School","Notes","No of similar courses currently on page CALLUM REMOVE CODE WHEN DONE","No of similar courses (Auto updates from cells)","Similar Course 1","Similar Course 2","Similar Course 3","Similar Course 4","Similar Course 5","Similar Course 6","Similar Course 7","Similar Course 8","Similar Course 9","Similar Course 10","Similar Course 11","Similar Course 12","Similar Course 13","Similar Course 14","Similar Course 15","Changed by BP? (Y/N)","Change Details"]
 writer.writerow(headers)#Writes the headers at the top of the spreadsheet
 
+similarCounter=0
 foundCount=0
 foundLinks=[]
 errorLinks=[]
@@ -40,6 +40,7 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
         return False
 
 def findUSPs(siteURL):#Returns a list of USPs for each site
+    global similarCounter # Cba to return val
     USPList=[getTitle(siteURL),siteURL,getFaculty(),getSchool(),"","",""]#Starts the list to have the url and two empty spots for the counters
     with open(root+"site.txt", "r", encoding="utf-8") as file:#Reads the file
         
@@ -49,12 +50,12 @@ def findUSPs(siteURL):#Returns a list of USPs for each site
         try:
             result = text.split("Similar Courses")[1]
             result = result.split("</ul>")[0]
-            
             lineCount=0#Counter used because repeating html means cant use index to search
             for line in result.split("\n"):#Checks every line
                 
                 if "<li>" in line:#If the line is a list item
                     USPLine=line#Reassigns the variable so i dont get confused
+                    similarCounter=similarCounter+1
                     if (USPLine.replace("<li>",""))=="":#If the line is empty without the <li>
                         USPLine=result.split("\n")[lineCount+1]#move to the next line which hopefully has the data
                         USPList[4]="Had to move to next line"
@@ -171,7 +172,7 @@ if continueInp=="y":#Confirm start
     print("Average time per course:",timeTaken/linksLength,"seconds")#Outputs average time per course
     print("\nFound",len(possibleReplacable),"phrases that possibly need replacing:")
     print(possibleReplacable)
-    
+    print("Courses with similar courses mentioned:",similarCounter)    
     #Writes the average to the txt for the next run to make an estimate
     averageFile=open(root+"averageTime.txt","w")
     averageFile.write(str(timeTaken/linksLength))
