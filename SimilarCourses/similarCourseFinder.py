@@ -186,8 +186,10 @@ if continueInp=="y":#Confirm start
     averageFile.write(str(timeTaken/linksLength))
     averageFile.close()
 
-    os.startfile(root+"output.csv")#Opens the output file automatically because I'm lazy
-
+    try:
+        os.startfile(root+"output.csv")#Opens the output file automatically because I'm lazy
+    except AttributeError:
+        print("Error auto-opening spreadsheet.")
 #Quit
 elif continueInp=="n":
     print("Quitting")
