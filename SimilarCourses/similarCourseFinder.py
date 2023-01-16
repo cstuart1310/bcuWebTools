@@ -28,15 +28,20 @@ similarCounter=0
 foundCount=0
 foundLinks=[]
 errorLinks=[]
+similarURL=[]
 
 possibleReplacable=[]#List to warn user of possible lines that need to be replaced
 
 def scrape(siteURL):#Gets the source code of the page and writes it into a text file
+    global similarCounter
     #Gets html
     try:
         with urllib.request.urlopen(siteURL) as url: #"Opens" URL (Gets data)
             site = url.read() #Reads the html code
             site=site.decode("utf-8")#Decodes the site
+            if "similar" in site.lower():
+                similarURL.append(siteURL)                
+                similarCounter=similarCounter+1
             return site
     except (urllib.error.HTTPError, ValueError):#Error handling for invalid links
         print("Page does not exist!",siteURL)
@@ -58,7 +63,7 @@ def findUSPs(siteURL,site):#Returns a list of USPs for each site
             
             if "<li>" in line or "<p>" in line:#If the line is a list item (Or p tag because these things arent consistent)
                 USPLine=line#Reassigns the variable so i dont get confused
-                similarCounter=similarCounter+1
+                
                 if (USPLine.replace("<li>",""))=="":#If the line is empty without the <li>
                     USPLine=result.split("\n")[lineCount+1]#move to the next line which hopefully has the data
                     USPList[4]="Had to move to next line"
@@ -66,9 +71,10 @@ def findUSPs(siteURL,site):#Returns a list of USPs for each site
                     USPLine=USPLine.replace(replacable,"")
                 USPLine=USPLine.replace("</span>","")#Removes spans so that course names can consistently be regexed out even with inconsistent code
                 USPLine=re.findall(r'">([^<]+)</a>',USPLine)#Finds the course name (Filters for a-z after ">  )
-                if len(USPLine)==0:
-                     USPLine.append("MANUAL CHECK")
+                # if len(USPLine)==0:
+                #      USPLine.append("MANUAL CHECK")
                 USPList.append(USPLine)#Adds the line to a list of USPs for this page
+                foundLinks.append(siteURL)
             lineCount+=1
         writer.writerow(USPList)#Writes the USPs and the URL to a csv
     except IndexError:
@@ -187,6 +193,11 @@ if continueInp=="y":#Confirm start
     averageFile=open(root+"averageTime.txt","w")
     averageFile.write(str(timeTaken/linksLength))
     averageFile.close()
+
+
+    for url in similarURL:
+        if url not in foundLinks:
+            print(url)
 
     try:
         os.startfile(root+"output.csv")#Opens the output file automatically because I'm lazy
