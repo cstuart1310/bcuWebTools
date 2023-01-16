@@ -49,7 +49,7 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
 
 def findUSPs(siteURL,site):#Returns a list of USPs for each site
     global similarCounter # Cba to return val
-    USPList=[getTitle(siteURL),siteURL,getFaculty(),getSchool(),"","",""]#Starts the list to have the url and two empty spots for the counters
+    USPList=[getTitle(siteURL),siteURL,getFaculty(site),getSchool(site),"","",""]#Starts the list to have the url and two empty spots for the counters
     text=site        
     #Cuts out the why choose us list section
     try:
@@ -75,44 +75,41 @@ def findUSPs(siteURL,site):#Returns a list of USPs for each site
         writer.writerow(USPList)#Writes the USPs and the URL to a csv
     except IndexError:
         errorLinks.append([siteURL,"No Why choose us"])
-        writer.writerow([getTitle(siteURL),siteURL,getFaculty(),getSchool(),"""No "Why Choose us" section found"""])#Writes the error to the csv
+        writer.writerow([getTitle(siteURL),siteURL,getFaculty(site),getSchool(site),"""No "Why Choose us" section found"""])#Writes the error to the csv
     
-def getFaculty():#Gets the faculty name from the site file
+def getFaculty(site):#Gets the faculty name from the site file
     facultyReplacables=["""                    <span class="value">""","""                    ""","\n"]
-
-    with open(root+"site.txt", "r", encoding="utf-8") as file:#Reads the file
         
-        text=file.read()
-        
-        #Cuts out the why choose us list section
-        try:
-            result = text.split("""<span class="title">Faculty</span>""")[1]
-            result = result.split("</span>")[0]
-            faculty=result.replace("""<span class="value">""","")
-            faculty=result
-            for replacable in facultyReplacables:
-                faculty=faculty.replace(replacable,"")
+    text=site
+    
+    #Cuts out the why choose us list section
+    try:
+        result = text.split("""<span class="title">Faculty</span>""")[1]
+        result = result.split("</span>")[0]
+        faculty=result.replace("""<span class="value">""","")
+        faculty=result
+        for replacable in facultyReplacables:
+            faculty=faculty.replace(replacable,"")
 
-        except:
-            faculty="Can't find faculty"
-        return faculty
+    except:
+        faculty="Can't find faculty"
+    return faculty
 
-def getSchool():#Gets the school name from the site file
+def getSchool(site):#Gets the school name from the site file
     schoolReplacables=["""                    <span class="value">""","""                    ""","\n"]
-    with open(root+"site.txt", "r", encoding="utf-8") as file:#Reads the file
         
-        text=file.read()
-        
-        #Cuts out the why choose us list section
-        try:
-            result = text.split("""<span class="title">School</span>""")[1]
-            result = result.split("</span>")[0]
-            school=result
-            for replacable in schoolReplacables:
-                school=school.replace(replacable,"")
-        except:
-            school="Can't find school"
-        return school
+    text=site
+    
+    #Cuts out the why choose us list section
+    try:
+        result = text.split("""<span class="title">School</span>""")[1]
+        result = result.split("</span>")[0]
+        school=result
+        for replacable in schoolReplacables:
+            school=school.replace(replacable,"")
+    except:
+        school="Can't find school"
+    return school
 
 def getTitle(url):#Gets the title from the url
     #response = request.urlopen(url)#loads page
