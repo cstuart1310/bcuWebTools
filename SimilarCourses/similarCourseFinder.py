@@ -10,10 +10,15 @@ import os
 
 print("-"*30)
 from concurrent.futures import ThreadPoolExecutor, wait
-root=os.path.dirname(os.path.abspath(__file__))+"\\"
+root=os.path.dirname(os.path.abspath(__file__))+"//"
 print("Root Dir:",root)
 
-outFile=open(root+"output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
+try:
+    outFile=open(root+"output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
+except PermissionError:
+    print("Error: Close the open file")
+    time.sleep(10)
+    outFile=open(root+"output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
 
 writer = csv.writer(outFile)#starts the writer
 headers=["Title","URL","Faculty","School","Notes","No of similar courses currently on page CALLUM REMOVE CODE WHEN DONE","No of similar courses (Auto updates from cells)","Similar Course 1","Similar Course 2","Similar Course 3","Similar Course 4","Similar Course 5","Similar Course 6","Similar Course 7","Similar Course 8","Similar Course 9","Similar Course 10","Similar Course 11","Similar Course 12","Similar Course 13","Similar Course 14","Similar Course 15","Changed by BP? (Y/N)","Change Details"]
@@ -27,11 +32,14 @@ errorLinks=[]
 possibleReplacable=[]#List to warn user of possible lines that need to be replaced
 
 def scrape(siteURL):#Gets the source code of the page and writes it into a text file
+    global similarCounter
     #Gets html
     try:
         with urllib.request.urlopen(siteURL) as url: #"Opens" URL (Gets data)
             site = url.read() #Reads the html code
             site=site.decode("utf-8")#Decodes the site
+            if "similar" in site.lower():
+                similarCounter=similarCounter+1
             return site
     except (urllib.error.HTTPError, ValueError):#Error handling for invalid links
         print("Page does not exist!",siteURL)
@@ -41,72 +49,67 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
 
 def findUSPs(siteURL,site):#Returns a list of USPs for each site
     global similarCounter # Cba to return val
-    USPList=[getTitle(siteURL),siteURL,getFaculty(),getSchool(),"","",""]#Starts the list to have the url and two empty spots for the counters
+    USPList=[getTitle(siteURL),siteURL,getFaculty(site),getSchool(site),"","",""]#Starts the list to have the url and two empty spots for the counters
     text=site        
     #Cuts out the why choose us list section
     try:
         result = text.split("Similar Courses")[1]
         result = result.split("</ul>")[0]
+        result=re.sub("[0-9]\n","",result)#Fixes random line breaks ending in numbers
         lineCount=0#Counter used because repeating html means cant use index to search
         for line in result.split("\n"):#Checks every line
             
-            if "<li>" in line:#If the line is a list item
+            if "<li>" in line or "<p>" in line:#If the line is a list item (Or p tag because these things arent consistent)
                 USPLine=line#Reassigns the variable so i dont get confused
-                similarCounter=similarCounter+1
                 if (USPLine.replace("<li>",""))=="":#If the line is empty without the <li>
                     USPLine=result.split("\n")[lineCount+1]#move to the next line which hopefully has the data
                     USPList[4]="Had to move to next line"
-                
-                USPLine=re.sub('("(.*?)")'," ",USPLine)#Removes all text in quotes (Could put in a txt but lazy)
-                USPLine=re.findall('(?<=</span>)(.*?)(?=</a)',USPLine)[0]#Removes all text in quotes (Could put in a txt but lazy)
-                for replacable in replacables:#Removes all items from the list (HTML tags)
-                    USPLine=USPLine.replace(replacable,"")
-                
-                if "<" in USPLine or ">" in USPLine:
-                    possibleReplacable.append(USPLine)#Adds to a list to maybe add to replacable file
+                # for replacable in replacables:#Removes all items from the list (HTML tags)
+                #     USPLine=USPLine.replace(replacable,"")
+                USPLine=USPLine.replace("</span>","")#Removes spans so that course names can consistently be regexed out even with inconsistent code
+                USPLine=re.findall(r'">([^<]+)</a>',USPLine)#Finds the course name (Filters for a-z after ">  )
+                # if len(USPLine[0])==0:
+                #      USPLine.append("MANUAL CHECK")
                 USPList.append(USPLine)#Adds the line to a list of USPs for this page
             lineCount+=1
         writer.writerow(USPList)#Writes the USPs and the URL to a csv
     except IndexError:
         errorLinks.append([siteURL,"No Why choose us"])
-        writer.writerow([getTitle(siteURL),siteURL,getFaculty(),getSchool(),"""No "Why Choose us" section found"""])#Writes the error to the csv
+        writer.writerow([getTitle(siteURL),siteURL,getFaculty(site),getSchool(site),"""No "Why Choose us" section found"""])#Writes the error to the csv
     
-def getFaculty():#Gets the faculty name from the site file
+def getFaculty(site):#Gets the faculty name from the site file
     facultyReplacables=["""                    <span class="value">""","""                    ""","\n"]
-
-    with open(root+"site.txt", "r", encoding="utf-8") as file:#Reads the file
         
-        text=file.read()
-        
-        #Cuts out the why choose us list section
-        try:
-            result = text.split("""<span class="title">Faculty</span>""")[1]
-            result = result.split("</span>")[0]
-            faculty=result.replace("""<span class="value">""","")
-            faculty=result
-            for replacable in facultyReplacables:
-                faculty=faculty.replace(replacable,"")
+    text=site
+    
+    #Cuts out the why choose us list section
+    try:
+        result = text.split("""<span class="title">Faculty</span>""")[1]
+        result = result.split("</span>")[0]
+        faculty=result.replace("""<span class="value">""","")
+        faculty=result
+        for replacable in facultyReplacables:
+            faculty=faculty.replace(replacable,"")
 
-        except:
-            faculty="Can't find faculty"
-        return faculty
+    except:
+        faculty="Can't find faculty"
+    return faculty
 
-def getSchool():#Gets the school name from the site file
+def getSchool(site):#Gets the school name from the site file
     schoolReplacables=["""                    <span class="value">""","""                    ""","\n"]
-    with open(root+"site.txt", "r", encoding="utf-8") as file:#Reads the file
         
-        text=file.read()
-        
-        #Cuts out the why choose us list section
-        try:
-            result = text.split("""<span class="title">School</span>""")[1]
-            result = result.split("</span>")[0]
-            school=result
-            for replacable in schoolReplacables:
-                school=school.replace(replacable,"")
-        except:
-            school="Can't find school"
-        return school
+    text=site
+    
+    #Cuts out the why choose us list section
+    try:
+        result = text.split("""<span class="title">School</span>""")[1]
+        result = result.split("</span>")[0]
+        school=result
+        for replacable in schoolReplacables:
+            school=school.replace(replacable,"")
+    except:
+        school="Can't find school"
+    return school
 
 def getTitle(url):#Gets the title from the url
     #response = request.urlopen(url)#loads page
@@ -184,8 +187,10 @@ if continueInp=="y":#Confirm start
     averageFile.write(str(timeTaken/linksLength))
     averageFile.close()
 
-    os.startfile(root+"output.csv")#Opens the output file automatically because I'm lazy
-
+    try:
+        os.startfile(root+"output.csv")#Opens the output file automatically because I'm lazy
+    except AttributeError:
+        print("Error auto-opening spreadsheet.")
 #Quit
 elif continueInp=="n":
     print("Quitting")
