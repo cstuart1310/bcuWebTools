@@ -198,7 +198,7 @@ for image in imagesArray:#Every file within the dir
         
             
 #Moves all dirs to the 'organized' folder
-courseDir=r"C:\Users\S20103502\Documents\Work\Tools\Organized\\"+courseName
+courseDir=root+courseName
 while moved==False:
     try:
         print("\nMoving dirs to",courseName)
