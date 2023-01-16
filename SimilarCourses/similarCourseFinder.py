@@ -66,8 +66,6 @@ def findUSPs(siteURL,site):#Returns a list of USPs for each site
                     USPLine=USPLine.replace(replacable,"")
                 USPLine=USPLine.replace("</span>","")#Removes spans so that course names can consistently be regexed out even with inconsistent code
                 USPLine=re.findall(r'">([^<]+)</a>',USPLine)#Finds the course name (Filters for a-z after ">  )
-                if len(USPLine)<2:
-                    USPLine=="MANUAL CHECK"
                 if len(USPLine)==0:
                      USPLine.append("MANUAL CHECK")
                 USPList.append(USPLine)#Adds the line to a list of USPs for this page
