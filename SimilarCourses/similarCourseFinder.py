@@ -68,6 +68,8 @@ def findUSPs(siteURL,site):#Returns a list of USPs for each site
                 USPLine=re.findall(r'">([^<]+)</a>',USPLine)#Finds the course name (Filters for a-z after ">  )
                 if len(USPLine)<2:
                     USPLine=="MANUAL CHECK"
+                if len(USPLine)==0:
+                     USPLine.append("MANUAL CHECK")
                 USPList.append(USPLine)#Adds the line to a list of USPs for this page
             lineCount+=1
         writer.writerow(USPList)#Writes the USPs and the URL to a csv
