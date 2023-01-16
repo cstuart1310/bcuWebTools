@@ -10,7 +10,7 @@ import os
 
 print("-"*30)
 from concurrent.futures import ThreadPoolExecutor, wait
-root=os.path.dirname(os.path.abspath(__file__))+"\\"
+root=os.path.dirname(os.path.abspath(__file__))+"//"
 print("Root Dir:",root)
 
 try:
@@ -32,11 +32,14 @@ errorLinks=[]
 possibleReplacable=[]#List to warn user of possible lines that need to be replaced
 
 def scrape(siteURL):#Gets the source code of the page and writes it into a text file
+    global similarCounter
     #Gets html
     try:
         with urllib.request.urlopen(siteURL) as url: #"Opens" URL (Gets data)
             site = url.read() #Reads the html code
             site=site.decode("utf-8")#Decodes the site
+            if "similar" in site.lower():
+                similarCounter=similarCounter+1
             return site
     except (urllib.error.HTTPError, ValueError):#Error handling for invalid links
         print("Page does not exist!",siteURL)
@@ -58,7 +61,6 @@ def findUSPs(siteURL,site):#Returns a list of USPs for each site
             
             if "<li>" in line or "<p>" in line:#If the line is a list item (Or p tag because these things arent consistent)
                 USPLine=line#Reassigns the variable so i dont get confused
-                similarCounter=similarCounter+1
                 if (USPLine.replace("<li>",""))=="":#If the line is empty without the <li>
                     USPLine=result.split("\n")[lineCount+1]#move to the next line which hopefully has the data
                     USPList[4]="Had to move to next line"
