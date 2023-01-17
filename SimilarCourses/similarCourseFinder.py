@@ -47,9 +47,9 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
         writer.writerow(["None",siteURL,"","","""Page is not public"""])#Writes the error into the csv
         return False
 
-def findUSPs(siteURL,site):#Returns a list of USPs for each site
+def findsimilars(siteURL,site):#Returns a list of similars for each site
     global similarCounter # Cba to return val
-    USPList=[getTitle(siteURL),siteURL,getFaculty(site),getSchool(site),"","",""]#Starts the list to have the url and two empty spots for the counters
+    similarList=[getTitle(siteURL),siteURL,getFaculty(site),getSchool(site),"","",""]#Starts the list to have the url and two empty spots for the counters
     text=site        
     #Cuts out the why choose us list section
     try:
@@ -60,22 +60,22 @@ def findUSPs(siteURL,site):#Returns a list of USPs for each site
         for line in result.split("\n"):#Checks every line
             
             if "<li>" in line or "<p>" in line:#If the line is a list item (Or p tag because these things arent consistent)
-                USPLine=line#Reassigns the variable so i dont get confused
-                if (USPLine.replace("<li>",""))=="":#If the line is empty without the <li>
-                    USPLine=result.split("\n")[lineCount+1]#move to the next line which hopefully has the data
-                    USPList[4]="Had to move to next line"
+                similarLine=line#Reassigns the variable so i dont get confused
+                if (similarLine.replace("<li>",""))=="":#If the line is empty without the <li>
+                    similarLine=result.split("\n")[lineCount+1]#move to the next line which hopefully has the data
+                    similarList[4]="Had to move to next line"
                 # for replacable in replacables:#Removes all items from the list (HTML tags)
-                #     USPLine=USPLine.replace(replacable,"")
-                USPLine=USPLine.replace("</span>","")#Removes spans so that course names can consistently be regexed out even with inconsistent code
-                USPLine=re.findall(r'">([^<]+)</a>',USPLine)#Finds the course name (Filters for a-z after ">  )
-                # if len(USPLine[0])==0:
-                #      USPLine.append("MANUAL CHECK")
-                USPList.append(USPLine)#Adds the line to a list of USPs for this page
+                #     similarLine=similarLine.replace(replacable,"")
+                similarLine=similarLine.replace("</span>","")#Removes spans so that course names can consistently be regexed out even with inconsistent code
+                similarLine=re.findall(r'">([^<]+)</a>',similarLine)#Finds the course name (Filters for a-z after ">  )
+                # if len(similarLine[0])==0:
+                #      similarLine.append("MANUAL CHECK")
+                similarList.append(similarLine)#Adds the line to a list of similars for this page
             lineCount+=1
-        writer.writerow(USPList)#Writes the USPs and the URL to a csv
+        writer.writerow(similarList)#Writes the similars and the URL to a csv
     except IndexError:
         errorLinks.append([siteURL,"No Why choose us"])
-        writer.writerow([getTitle(siteURL),siteURL,getFaculty(site),getSchool(site),"""No "Why Choose us" section found"""])#Writes the error to the csv
+        writer.writerow([getTitle(siteURL),siteURL,getFaculty(site),getSchool(site),"""No similar section found"""])#Writes the error to the csv
     
 def getFaculty(site):#Gets the faculty name from the site file
     facultyReplacables=["""                    <span class="value">""","""                    ""","\n"]
@@ -126,7 +126,7 @@ def initScrape(siteURL):
         site=scrape(siteURL)#Gets HTML as plain text
         printLine=("Read HTML for site:"+siteURL)
         print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")
-        findUSPs(siteURL,site)#Looks for phrase in HTML
+        findsimilars(siteURL,site)#Looks for phrase in HTML
 
 
 
