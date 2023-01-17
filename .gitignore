@@ -49,3 +49,5 @@ Ignored/webScrapeUI.py
 Ignored/*
 *\workFolder\*
 *.xlsm
+SimilarCourses/test.py
+SimilarCourses/workFolder/test.html
