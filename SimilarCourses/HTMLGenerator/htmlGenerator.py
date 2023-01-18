@@ -7,10 +7,12 @@ import re
 import csv#Used to write the info into a csv
 from bs4 import BeautifulSoup #Used just to parse the title of the page
 import os
+from PIL import Image
+
 
 print("-"*30)
 from concurrent.futures import ThreadPoolExecutor, wait
-root=os.path.dirname(os.path.abspath(__file__))+"//"
+root=os.path.dirname(os.path.abspath(__file__))+"\\"
 print("Root Dir:",root)
 
 similarCounter=0
@@ -28,6 +30,7 @@ def initScrape(siteURL):
         printLine=("Read HTML for site:"+siteURL)
         print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")
         print(getImageTag(site))
+        
         #findUSPs(siteURL,site)#Looks for phrase in HTML
 
 def scrape(siteURL):#Gets the source code of the page and writes it into a text file
@@ -39,6 +42,7 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
             site=site.decode("utf-8")#Decodes the site
             return site
     except (urllib.error.HTTPError, ValueError):#Error handling for invalid links
+        print(e)
         print("Page does not exist!",siteURL)
         errorLinks.append([siteURL,"404'd"])#Adds to array to tell user broken links at end of program
         writer.writerow(["None",siteURL,"","","""Page is not public"""])#Writes the error into the csv
@@ -55,13 +59,27 @@ def getImageTag(site):
 
 def checkImageSize(imageTag):
     #gets the URL from the tag
-    imageURL=re.findall(r'src="([^ ]+)',imageTag)[0]
+    imageURL=re.findall(r'src="([^? ]+)',imageTag)[0]
     print("URL",imageURL)
-    imageURLReplacables=['<img src="','" alt']
+    imageURLReplacables=['<img src="','" alt','"']
     imageURL=imageURL.replace("&amp;"," ")
     for replacable in imageURLReplacables:
         imageURL=imageURL.replace(replacable,"")
+    
+    #Downloads URL
     print(imageURL)
+    imagePath=root+"test.jpg"
+    print(imagePath)
+    print("Downloading")
+    try:
+        urllib.request.urlretrieve(imageURL, imagePath)
+        print("Downloaded")
+        im = Image.open(imagePath)
+        print("Size:",im.size)
+    except Exception as e:
+        print(e)
+
+
 
 #Main
 
