@@ -11,7 +11,6 @@ from PIL import Image
 
 
 print("-"*30)
-from concurrent.futures import ThreadPoolExecutor, wait
 root=os.path.dirname(os.path.abspath(__file__))+"\\"
 print("Root Dir:",root)
 
@@ -172,14 +171,10 @@ continueInp=input(">")#Doesn't immediately begin due to long processing time nee
 
 if continueInp=="y":#Confirm start
     print("---------------")
-    futures=[]
     start = time.time()#starts the timer
     siteIndex=0#Index 0 for the pos of the site url in the list
-    with ThreadPoolExecutor() as executor:
-        for siteURL in links:#Iterates through each URL in the file
-            futures.append(executor.submit(initScrape, siteURL))
-
-    wait(futures)
+    for siteURL in links:#Iterates through each URL in the file
+        initScrape(siteURL)
 
     print("-----Done scraping!-----")
     end = time.time()#Ends the timer
