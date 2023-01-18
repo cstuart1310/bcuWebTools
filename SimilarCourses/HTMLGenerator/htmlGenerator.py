@@ -79,8 +79,75 @@ def checkImageSize(imageTag):
     except Exception as e:
         print(e)
 
+def compileHTML(courseURL):
+    template="""
+    
+<div class="similar-courses__card">
+    <div class="similar-courses__image">$IMAGETAG</div>
+    <div class="similar-courses__text">
+    <h4 class="similar-courses__title">$COURSETITLE<span class="similar-course-card__intake">$COURSEENTRY</span></h4>
+    <a href="$COURSEURL" class="similar-courses__link"></a></div>
+    </div>    
+    
+    
+    """
 
+    code=template.replace("$IMAGETAG",getImageTag(courseURL))
+    code=code.replace("$COURSETITLE",getTitle(courseURL))
+    code=code.replace("$COURSEENTRY",getEntry(courseURL))
+    code=code.replace("$COURSEURL",getURL(courseURL))
+    print(code)
+    return code
 
+def getFaculty(site):#Gets the faculty name from the site file
+    facultyReplacables=["""                    <span class="value">""","""                    ""","\n"]
+        
+    text=site
+    
+    #Cuts out the why choose us list section
+    try:
+        result = text.split("""<span class="title">Faculty</span>""")[1]
+        result = result.split("</span>")[0]
+        faculty=result.replace("""<span class="value">""","")
+        faculty=result
+        for replacable in facultyReplacables:
+            faculty=faculty.replace(replacable,"")
+
+    except:
+        faculty="Can't find faculty"
+    return faculty
+
+def getSchool(site):#Gets the school name from the site file
+    schoolReplacables=["""                    <span class="value">""","""                    ""","\n"]
+        
+    text=site
+    
+    #Cuts out the why choose us list section
+    try:
+        result = text.split("""<span class="title">School</span>""")[1]
+        result = result.split("</span>")[0]
+        school=result
+        for replacable in schoolReplacables:
+            school=school.replace(replacable,"")
+    except:
+        school="Can't find school"
+    return school
+
+def getTitle(url):#Gets the title from the url
+    soup = BeautifulSoup(request.urlopen(url),features="html.parser")#reads the html as soup
+    title= (soup.title.string)#gets the page title from soup
+    return title
+
+def getEntry(url):#Entry year
+    entry=getTitle(url)
+    entry=re.findall("[-].*[-]",entry)[0]
+    entry=entry.replace("- ")
+    entry=entry.replace(" -")
+    return entry
+
+def getURL(url):#Gets the url in a domain-less format
+    url=url.replace("https://www.bcu.ac.uk","")
+    return url
 #Main
 
 linkFile=open(root+"links.txt","r")#Opens link file
