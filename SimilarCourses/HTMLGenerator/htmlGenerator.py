@@ -8,6 +8,7 @@ import csv#Used to write the info into a csv
 from bs4 import BeautifulSoup #Used just to parse the title of the page
 import os
 from PIL import Image
+import webbrowser
 
 
 print("-"*30)
@@ -19,6 +20,19 @@ foundCount=0
 foundLinks=[]
 errorLinks=[]
 
+
+try:
+    outFile=open(root+"output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
+except PermissionError:
+    print("Error: Close the open file")
+    time.sleep(10)
+    outFile=open(root+"output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
+
+
+writer = csv.writer(outFile)#starts the writer
+headers=["Title","URL","Faculty","School","Notes","Code"]
+writer.writerow(headers)#Writes the headers at the top of the spreadsheet
+
 def initScrape(siteURL):
     global siteIndex
     siteIndex+=1#Counter of no of sites checked
@@ -28,9 +42,13 @@ def initScrape(siteURL):
         site=scrape(siteURL)#Gets HTML as plain text
         printLine=("Read HTML for site:"+siteURL)
         print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")
-        print(getImageTag(site))
         
-        #findUSPs(siteURL,site)#Looks for phrase in HTML
+        try:
+            writer.writerow([getTitle(site),siteURL,getFaculty(site),getSchool(site),"",compileHTML(siteURL,site)])
+        except AttributeError:
+            print("Error:",siteURL)
+            writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
+
 
 def scrape(siteURL):#Gets the source code of the page and writes it into a text file
     global similarCounter
@@ -41,7 +59,6 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
             site=site.decode("utf-8")#Decodes the site
             return site
     except (urllib.error.HTTPError, ValueError):#Error handling for invalid links
-        print(e)
         print("Page does not exist!",siteURL)
         errorLinks.append([siteURL,"404'd"])#Adds to array to tell user broken links at end of program
         writer.writerow(["None",siteURL,"","","""Page is not public"""])#Writes the error into the csv
@@ -52,18 +69,35 @@ def getImageTag(site):
         if "<img" in line and "course__image" in line:
             print("found")
             line=line.split(">")[0]
-            checkImageSize(line)
+
+            #gets image url
+            imageURL=re.findall(r'src="([^? ]+)',line)[0]
+            print("URL",imageURL)
+                #gets the URL from the tag
+            imageURLReplacables=['<img src="','" alt','"']
+            imageURL=imageURL.replace("&amp;"," ")
+            for replacable in imageURLReplacables:
+                imageURL=imageURL.replace(replacable,"")
+       
+            checkImageSize(imageURL)
+            
+            #gets alt text to searh in media manager
+            imageAlt=re.findall(r'alt="([^? ]+)',line)[0]
+            print("Alt",imageAlt)
+                #gets the URL from the tag
+            imageAltReplacables=['<img src="','" alt="','"']
+            imageAlt=imageAlt.replace("&amp;"," ")
+            for replacable in imageAltReplacables:
+                imageAlt=imageAlt.replace(replacable,"")
+       
+            # webbrowser.open(imageURL)
+            # https://www.bcu.ac.uk/cms/mediamanager/ImageBrowser?Inline=False&mediaType=&search=test&pageSize=20&view=Thumbnails
+            #os.startfile(imgURL)
+#            webbrowser.get('firefox').open_new_tab(imgURL)
             return line
     return "None found"
 
-def checkImageSize(imageTag):
-    #gets the URL from the tag
-    imageURL=re.findall(r'src="([^? ]+)',imageTag)[0]
-    print("URL",imageURL)
-    imageURLReplacables=['<img src="','" alt','"']
-    imageURL=imageURL.replace("&amp;"," ")
-    for replacable in imageURLReplacables:
-        imageURL=imageURL.replace(replacable,"")
+def checkImageSize(imageURL):
     
     #Downloads URL
     print(imageURL)
@@ -78,8 +112,8 @@ def checkImageSize(imageTag):
     except Exception as e:
         print(e)
 
-def compileHTML(courseURL):
-    template="""
+def compileHTML(courseURL,site):
+    template='''
     
 <div class="similar-courses__card">
     <div class="similar-courses__image">$IMAGETAG</div>
@@ -89,14 +123,20 @@ def compileHTML(courseURL):
     </div>    
     
     
-    """
+'''
 
-    code=template.replace("$IMAGETAG",getImageTag(courseURL))
-    code=code.replace("$COURSETITLE",getTitle(courseURL))
-    code=code.replace("$COURSEENTRY",getEntry(courseURL))
-    code=code.replace("$COURSEURL",getURL(courseURL))
-    print(code)
-    return code
+    testImageTag="""<img src="https://bcu.imgix.net/film-technology-and-visual-effects-131871956434897300.jpg?auto=format&fm=jpg" alt="School of Digital Media Technology 1200 x 450 course image" data-source="6e2b20e7-76ea-e411-80cd-005056831842">"""
+    
+    try:
+        code=template.replace("$IMAGETAG",testImageTag)#getImageTag(site))
+        code=code.replace("$COURSETITLE",getTitle(site))
+        code=code.replace("$COURSEENTRY",getEntry(courseURL))
+        code=code.replace("$COURSEURL",getURL(courseURL))
+        #print(code)
+        return code
+    except TypeError:
+        return "ERROR"
+    
 
 def getFaculty(site):#Gets the faculty name from the site file
     facultyReplacables=["""                    <span class="value">""","""                    ""","\n"]
@@ -132,17 +172,25 @@ def getSchool(site):#Gets the school name from the site file
         school="Can't find school"
     return school
 
-def getTitle(url):#Gets the title from the url
-    soup = BeautifulSoup(request.urlopen(url),features="html.parser")#reads the html as soup
-    title= (soup.title.string)#gets the page title from soup
-    return title
+def getTitle(site):#Gets the title from the url
+    for line in site.split("\n"):
+        if "<h1>" in line:
+            line=line.replace("<h1>","")
+            line=line.replace("</h1>","")
+            return line
 
 def getEntry(url):#Entry year
-    entry=getTitle(url)
-    entry=re.findall("[-].*[-]",entry)[0]
-    entry=entry.replace("- ")
-    entry=entry.replace(" -")
-    return entry
+    soup = BeautifulSoup(request.urlopen(url),features="html.parser")#reads the html as soup
+    title= (soup.title.string)#gets the page title from soup
+    
+    try:
+        entry=str(re.findall("[2].*[-]",title)[0])
+        entry=entry.replace("- ","")
+        entry=entry.replace(" -","")
+        return entry
+    except IndexError:
+        return "Can't find Entry"
+    
 
 def getURL(url):#Gets the url in a domain-less format
     url=url.replace("https://www.bcu.ac.uk","")
