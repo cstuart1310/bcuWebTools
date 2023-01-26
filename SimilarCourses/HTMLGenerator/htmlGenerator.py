@@ -80,11 +80,12 @@ def getImageTag(site):
                 imageURL=imageURL.replace(replacable,"")
             checkImageSize(imageURL)
 
-            idFile=open((root+"mediaIds.txt"),"r")
+            idFile=open((root+"mediaIds.txt"),"r",encoding="utf-8")
             for idLine in idFile.readlines():
                 if imageURL in idLine:
                     print(idLine)
                     break
+            idFile.close()
             print("finding")
             imgAlt=re.findall(r'alt="([^?"]+)',idLine)[0]
             imgData=re.findall(r'data-source="([^?"]+)',idLine)[0]
