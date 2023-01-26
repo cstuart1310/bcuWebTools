@@ -73,28 +73,34 @@ def getImageTag(site):
             #gets image url
             imageURL=re.findall(r'src="([^? ]+)',line)[0]
             print("URL",imageURL)
-                #gets the URL from the tag
+            #gets the URL from the tag
             imageURLReplacables=['<img src="','" alt','"']
             imageURL=imageURL.replace("&amp;"," ")
             for replacable in imageURLReplacables:
                 imageURL=imageURL.replace(replacable,"")
-       
             checkImageSize(imageURL)
-            
-            #gets alt text to searh in media manager
-            imageAlt=re.findall(r'alt="([^? ]+)',line)[0]
-            print("Alt",imageAlt)
-                #gets the URL from the tag
-            imageAltReplacables=['<img src="','" alt="','"']
-            imageAlt=imageAlt.replace("&amp;"," ")
-            for replacable in imageAltReplacables:
-                imageAlt=imageAlt.replace(replacable,"")
-       
+
+            idFile=open((root+"mediaIds.txt"),"r")
+            for idLine in idFile.readlines():
+                if imageURL in idLine:
+                    print(idLine)
+                    break
+            print("finding")
+            imgAlt=re.findall(r'alt="([^?"]+)',idLine)[0]
+            imgData=re.findall(r'data-source="([^?"]+)',idLine)[0]
+            print("-"*20)
+            print(imageURL)
+            print(imgData)
+            print(imgAlt)            
             # webbrowser.open(imageURL)
             # https://www.bcu.ac.uk/cms/mediamanager/ImageBrowser?Inline=False&mediaType=&search=test&pageSize=20&view=Thumbnails
             #os.startfile(imgURL)
 #            webbrowser.get('firefox').open_new_tab(imgURL)
-            return line
+            imgTag="""<img src="$IMGURL" alt="$IMGALT" data-source="$IMGDATA">"""
+            imgTag=imgTag.replace("$IMGURL",imageURL)
+            imgTag=imgTag.replace("$IMGALT",imgAlt)
+            imgTag=imgTag.replace("$IMGDATA",imgData)
+            return imgTag
     return "None found"
 
 def checkImageSize(imageURL):
@@ -128,7 +134,7 @@ def compileHTML(courseURL,site):
     testImageTag="""<img src="https://bcu.imgix.net/film-technology-and-visual-effects-131871956434897300.jpg?auto=format&fm=jpg" alt="School of Digital Media Technology 1200 x 450 course image" data-source="6e2b20e7-76ea-e411-80cd-005056831842">"""
     
     try:
-        code=template.replace("$IMAGETAG",testImageTag)#getImageTag(site))
+        code=template.replace("$IMAGETAG",getImageTag(site))#getImageTag(site))
         code=code.replace("$COURSETITLE",getTitle(site))
         code=code.replace("$COURSEENTRY",getEntry(courseURL))
         code=code.replace("$COURSEURL",getURL(courseURL))
