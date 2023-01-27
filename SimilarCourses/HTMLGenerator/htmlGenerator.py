@@ -193,14 +193,14 @@ def getEntry(url):#Entry year
     soup = BeautifulSoup(request.urlopen(url),features="html.parser")#reads the html as soup
     title= (soup.title.string)#gets the page title from soup
     
-    # try:
-    entry=str(re.findall("[2].*[|]",title)[0])#Looks between 2 and the | in the title (Will need to futureproof since won't work for courses in the year 3000+)
-    entry=entry.replace("- ","")
-    entry=entry.replace(" -","")
-    entry=entry.replace(" |","")
-    return entry
-    # except IndexError:
-    #     return "Can't find Entry"
+    try:
+        entry=str(re.findall("[2].*[|]",title)[0])#Looks between 2 and the | in the title (Will need to futureproof since won't work for courses in the year 3000+)
+        entry=entry.replace("- ","")
+        entry=entry.replace(" -","")
+        entry=entry.replace(" |","")
+        return entry
+    except IndexError:
+        return "Can't find Entry"
     
 
 def getURL(url):#Gets the url in a domain-less format
