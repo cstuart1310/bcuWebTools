@@ -87,7 +87,10 @@ def getImageTag(site):
                     break
             idFile.close()
             print("finding")
-            imgAlt=re.findall(r'alt="([^?"]+)',idLine)[0]
+            try:
+                imgAlt=re.findall(r'alt="([^?"]+)',idLine)[0]
+            except IndexError:
+                imgAlt=re.findall(r'"alt=""')[0]
             imgData=re.findall(r'data-source="([^?"]+)',idLine)[0]
             print("-"*20)
             print(imageURL)
