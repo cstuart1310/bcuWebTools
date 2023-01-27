@@ -140,7 +140,7 @@ def compileHTML(courseURL,site):
     try:
         code=template.replace("$IMAGETAG",getImageTag(site))#getImageTag(site))
         code=code.replace("$COURSETITLE",getTitle(site))
-        code=code.replace("$COURSEENTRY",getEntry(courseURL))
+        code=code.replace("$COURSEENTRY",getEntry(site))
         code=code.replace("$COURSEURL",getURL(courseURL))
         #print(code)
         return code
@@ -189,12 +189,12 @@ def getTitle(site):#Gets the title from the url
             line=line.replace("</h1>","")
             return line
 
-def getEntry(url):#Entry year
-    soup = BeautifulSoup(request.urlopen(url),features="html.parser")#reads the html as soup
-    title= (soup.title.string)#gets the page title from soup
+def getEntry(site):#Entry year
+    # soup = BeautifulSoup(request.urlopen(url),features="html.parser")#reads the html as soup
+    # title= (soup.title.string)#gets the page title from soup
     
     try:
-        entry=str(re.findall("[2].*Entry",title)[0])#Looks between 2 and the | in the title (Will need to futureproof since won't work for courses in the year 3000+)
+        entry=str(re.findall("[2].*Entry",site)[0])#Looks between 2 and entry in the page (Will need to futureproof since won't work for courses in the year 3000+)
         entry=entry.replace("- ","")
         entry=entry.replace(" -","")
         entry=entry.replace(" |","")
