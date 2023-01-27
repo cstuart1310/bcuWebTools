@@ -194,7 +194,7 @@ def getEntry(url):#Entry year
     title= (soup.title.string)#gets the page title from soup
     
     try:
-        entry=str(re.findall("[2].*[|]",title)[0])#Looks between 2 and the | in the title (Will need to futureproof since won't work for courses in the year 3000+)
+        entry=str(re.findall("[2].*Entry",title)[0])#Looks between 2 and the | in the title (Will need to futureproof since won't work for courses in the year 3000+)
         entry=entry.replace("- ","")
         entry=entry.replace(" -","")
         entry=entry.replace(" |","")
