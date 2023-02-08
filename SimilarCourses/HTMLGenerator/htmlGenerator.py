@@ -20,6 +20,13 @@ foundCount=0
 foundLinks=[]
 errorLinks=[]
 
+imgMaxX=1300
+imgMaxY=500
+
+imgMinX=1100
+imgMinY=400
+imgLeeway=0.95#%
+
 
 try:
     outFile=open(root+"output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
@@ -67,7 +74,6 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
 def getImageTag(site):
     for line in site.split("\n"):
         if "<img" in line and "course__image" in line:
-            print("found")
             line=line.split(">")[0]
 
             #gets image url
@@ -78,24 +84,22 @@ def getImageTag(site):
             imageURL=imageURL.replace("&amp;"," ")
             for replacable in imageURLReplacables:
                 imageURL=imageURL.replace(replacable,"")
-            checkImageSize(imageURL)
+            if checkImageSize(imageURL)==False:
+                imageURL="$MANUALIMAGE"
 
             idFile=open((root+"mediaIds.txt"),"r",encoding="utf-8")
             for idLine in idFile.readlines():
                 if imageURL in idLine:
-                    print(idLine)
                     break
             idFile.close()
-            print("finding")
             try:
                 imgAlt=re.findall(r'alt="([^?"]+)',idLine)[0]
             except IndexError:
                 imgAlt=re.findall(r'"alt=""')[0]
             imgData=re.findall(r'data-source="([^?"]+)',idLine)[0]
-            print("-"*20)
-            print(imageURL)
-            print(imgData)
-            print(imgAlt)            
+            print("URL:",imageURL)
+            print("Data:",imgData)
+            print("Alt:",imgAlt)            
             # webbrowser.open(imageURL)
             # https://www.bcu.ac.uk/cms/mediamanager/ImageBrowser?Inline=False&mediaType=&search=test&pageSize=20&view=Thumbnails
             #os.startfile(imgURL)
@@ -119,6 +123,13 @@ def checkImageSize(imageURL):
         print("Downloaded")
         im = Image.open(imagePath)
         print("Size:",im.size)
+        if im.size[0]>=imgMinX and im.size[0]<imgMaxX:
+            if im.size[1]>=imgMinY and im.size[1]<=imgMaxY:
+                print("Good size")
+                return True
+        else:
+            print("Bad size")
+            return False
     except Exception as e:
         print(e)
 
@@ -135,17 +146,30 @@ def compileHTML(courseURL,site):
     
 '''
 
-    testImageTag="""<img src="https://bcu.imgix.net/film-technology-and-visual-effects-131871956434897300.jpg?auto=format&fm=jpg" alt="School of Digital Media Technology 1200 x 450 course image" data-source="6e2b20e7-76ea-e411-80cd-005056831842">"""
     
     try:
         code=template.replace("$IMAGETAG",getImageTag(site))#getImageTag(site))
+    except:
+        print("Bad img")
+        return "Bad img"
+
+    try:
         code=code.replace("$COURSETITLE",getTitle(site))
+    except:
+        print("Bad title")
+        return "Bad title"
+    try:
         code=code.replace("$COURSEENTRY",getEntry(site))
+    except:
+        print("Bad entry")
+        return "Bad entry"
+    try:
         code=code.replace("$COURSEURL",getURL(courseURL))
+    except:
+        print("BadURL")
+        return "Bad url"
         #print(code)
-        return code
-    except TypeError:
-        return "ERROR"
+    return code
     
 
 def getFaculty(site):#Gets the faculty name from the site file
