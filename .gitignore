@@ -51,3 +51,4 @@ Ignored/*
 *.xlsm
 SimilarCourses/test.py
 SimilarCourses/workFolder/test.html
+*.jpg
