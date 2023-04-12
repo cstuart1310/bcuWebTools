@@ -49,3 +49,7 @@ Ignored/webScrapeUI.py
 Ignored/*
 Tinifier/AutoCompressed/*
 Tinifier/Raw/*
+*.jpg
+*.png
+*.jpeg
+*.jfif
