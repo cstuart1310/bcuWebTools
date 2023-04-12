@@ -47,47 +47,9 @@ USPFinder/Spreadsheets/Export/C Export 3/USP Project BP Version.zip
 USPFinder/averageTime.txt
 Ignored/webScrapeUI.py
 Ignored/*
-*\workFolder\*
-*.xlsm
-SimilarCourses/test.py
-SimilarCourses/workFolder/test.html
+Tinifier/AutoCompressed/*
+Tinifier/Raw/*
 *.jpg
-*.xlsm
-SimilarCourses/HTMLGenerator/averageTime.txt
-*.jpg
-SimilarCourses/HTMLGenerator/mediaIds.htm
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/visual-effects-play-132924385012553647.avif
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/visual-effects-copy-132453533277329827.avif
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/vfx.avif
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/script.htm
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/sci-fi-visual-effects-news-story-resized-130541445519983679.avif
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/Render_data/jquery.1.11.2.min.js
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/Render_data/handlebars.min.js
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/Render.htm
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/nuke-news-vfx-132811033329121167.avif
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/nuke-1-132811902065744288.avif
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/media-manager.js
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/media-imagebrowser.js
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/lianne-forbes-oscar-132585539067125195.avif
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/greenscreenbcuonline-lecture-132569983621544438.avif
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/global-nav-4.min.css
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/ga.js
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/filmtechnologyandvisualeffects-131201517588866131.avif
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/film-technology-and-visual-effects-131871956434897300.avif
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/film-tech-and-visual-effects-131656872100028882.avif
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/editcss.css
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/dialog.js
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/dashboardjs
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/css.css
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/corejs
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/corecss.css
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/cmscss.css
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/cms-icons.css
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/cdl.plugins.min.js
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/cdl.min.css
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/beatriz-jordao-placement-132556210775990411.avif
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/analytics_002.js
-SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/analytics.js
-SimilarCourses/HTMLGenerator/averageTime.txt
-SimilarCourses/HTMLGenerator/mediaIds.txt
-SimilarCourses/HTMLGenerator/mediaIdsOld.txt
+*.png
+*.jpeg
+*.jfif

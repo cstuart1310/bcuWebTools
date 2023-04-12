@@ -20,9 +20,13 @@ tinify.key = tinyKeys[tinyKeyVal]
 
 compressions_this_month = tinify.compression_count
 
-rawPath=r"C:\Users\S20103502\Documents\Work\Tools\Raw\\"
-resizedPath=r"C:\Users\S20103502\Documents\Work\Tools\Resized\\"
-compPath=r"C:\Users\S20103502\Documents\Work\Tools\AutoCompressed\\"
+
+root=os.path.dirname(os.path.abspath(__file__))+"\\"
+print("Root Dir:",root)
+
+rawPath=root+"Raw\\"
+resizedPath=root+"Resized\\"
+compPath=root+"AutoCompressed\\"
 
 imagesArray=[]
 errorPaths=[]
@@ -194,7 +198,7 @@ for image in imagesArray:#Every file within the dir
         
             
 #Moves all dirs to the 'organized' folder
-courseDir=r"C:\Users\S20103502\Documents\Work\Tools\Organized\\"+courseName
+courseDir=root+courseName
 while moved==False:
     try:
         print("\nMoving dirs to",courseName)
