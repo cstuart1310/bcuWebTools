@@ -48,10 +48,10 @@ def initScrape(siteURL):
     else:
         site=scrape(siteURL)#Gets HTML as plain text
         printLine=("Read HTML for site:"+siteURL)
-        print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")
+        print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")#prints lined up %
         
         try:
-            writer.writerow([getTitle(site),siteURL,getFaculty(site),getSchool(site),"",compileHTML(siteURL,site)])
+            writer.writerow([getTitle(site),siteURL,getFaculty(site),getSchool(site),"",compileHTML(siteURL,site)])#writes info from each func into csv
         except AttributeError:
             print("Error:",siteURL)
             writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
@@ -149,8 +149,8 @@ def compileHTML(courseURL,site):
     
     try:
         code=template.replace("$IMAGETAG",getImageTag(site))#getImageTag(site))
-    except:
-        print("Bad img")
+    except Exception as e:
+        print("Bad img",e)
         return "Bad img"
 
     try:
