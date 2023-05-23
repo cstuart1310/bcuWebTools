@@ -31,8 +31,8 @@ compPath=root+"AutoCompressed\\"
 imagesArray=[]
 errorPaths=[]
 
-widthX=100
-widthY=150
+widthX=6000
+widthY=9000
 
 maxImgSize=100000#Max no of bits the image size can be
 
@@ -160,7 +160,7 @@ for image in imagesArray:#Every file within the dir
             print("Below",maxImgSize,"bytes at",qualityValue,"% quality")
             print("Size:",os.path.getsize(resizedPath+filename),"bytes")
         else:
-            qualityValue=qualityValue-1#Lowers quality
+            qualityValue=qualityValue-0.5#Lowers quality
             if qualityValue<1:#Makes sure the quality doesn't go below 1 because idk what will happen
                 qualityValue=1
             print("Size is",os.path.getsize(resizedPath+filename))
