@@ -85,3 +85,5 @@ SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager_files/analytics.js
 SimilarCourses/HTMLGenerator/averageTime.txt
 SimilarCourses/HTMLGenerator/mediaIds.txt
 SimilarCourses/HTMLGenerator/mediaIdsOld.txt
+*.jpeg
+*.png
