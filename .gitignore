@@ -54,3 +54,6 @@ Tinifier/Raw/*
 *.jpeg
 *.jfif
 test/
+*.avif
+*.js
+SimilarCourses/HTMLGenerator/CMS Dashboard Media Manager.htm
