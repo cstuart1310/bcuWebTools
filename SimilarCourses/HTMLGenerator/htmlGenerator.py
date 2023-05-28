@@ -82,6 +82,7 @@ def getImageTag(site):
             #gets the URL from the tag
             imageURLReplacables=['<img src="','" alt','"']
             imageURL=imageURL.replace("&amp;"," ")
+            print("ImageURL:",imageURL)
             for replacable in imageURLReplacables:
                 imageURL=imageURL.replace(replacable,"")
             if checkImageSize(imageURL)==False:
@@ -90,6 +91,7 @@ def getImageTag(site):
             idFile=open((root+"mediaIds.txt"),"r",encoding="utf-8")
             for idLine in idFile.readlines():
                 if imageURL in idLine:
+                    print("idline:",idLine)
                     break
             idFile.close()
             try:
@@ -100,10 +102,6 @@ def getImageTag(site):
             print("URL:",imageURL)
             print("Data:",imgData)
             print("Alt:",imgAlt)            
-            # webbrowser.open(imageURL)
-            # https://www.bcu.ac.uk/cms/mediamanager/ImageBrowser?Inline=False&mediaType=&search=test&pageSize=20&view=Thumbnails
-            #os.startfile(imgURL)
-#            webbrowser.get('firefox').open_new_tab(imgURL)
             imgTag="""<img src="$IMGURL" alt="$IMGALT" data-source="$IMGDATA">"""
             imgTag=imgTag.replace("$IMGURL",imageURL)
             imgTag=imgTag.replace("$IMGALT",imgAlt)
@@ -146,17 +144,25 @@ def compileHTML(courseURL,site):
     
 '''
 
-    
+    replaceImageTag=getImageTag(site)
+    replaceCourseTitle=getTitle(site)
+    replaceCourseEntry=getEntry(site)
+    replaceCourseURL=getURL(courseURL)
+    print("Data")
+    print("Title:",replaceCourseTitle)
+    print("Entry Year:",replaceCourseEntry)
+    print("URL:",replaceCourseURL)
+    print("Image Tag:",replaceImageTag)
     try:
         code=template.replace("$IMAGETAG",getImageTag(site))#getImageTag(site))
     except Exception as e:
         print("Bad img",e)
-        return "Bad img"
+        #return "Bad img"
 
     try:
         code=code.replace("$COURSETITLE",getTitle(site))
-    except:
-        print("Bad title")
+    except Exception as e:
+        print("Bad title",e)
         return "Bad title"
     try:
         code=code.replace("$COURSEENTRY",getEntry(site))
@@ -218,13 +224,14 @@ def getEntry(site):#Entry year
     # title= (soup.title.string)#gets the page title from soup
     
     try:
-        entry=str(re.findall("[2].*Entry",site)[0])#Looks between 2 and entry in the page (Will need to futureproof since won't work for courses in the year 3000+)
+        entry=str(re.findall("202[0-9]/(?:2[0-9]|30) Entry",site)[0])#Looks between 2 and entry in the page (Will need to futureproof since won't work for courses in the year 3000+)
         entry=entry.replace("- ","")
         entry=entry.replace(" -","")
         entry=entry.replace(" |","")
         return entry
-    except IndexError:
-        return "Can't find Entry"
+
+    except:
+        return False
     
 
 def getURL(url):#Gets the url in a domain-less format
@@ -257,6 +264,7 @@ if continueInp=="y":#Confirm start
     start = time.time()#starts the timer
     siteIndex=0#Index 0 for the pos of the site url in the list
     for siteURL in links:#Iterates through each URL in the file
+        print("-"*10)
         initScrape(siteURL)
 
     print("-----Done scraping!-----")
