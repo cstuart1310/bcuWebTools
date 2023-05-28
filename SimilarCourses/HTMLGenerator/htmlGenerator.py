@@ -70,8 +70,53 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
         errorLinks.append([siteURL,"404'd"])#Adds to array to tell user broken links at end of program
         writer.writerow(["None",siteURL,"","","""Page is not public"""])#Writes the error into the csv
         return False
-
+    
 def getImageTag(site):
+    foundLine=False
+    imgTag="""<img src="$IMGURL" alt="$IMGALT" data-source="$IMGDATA">"""#template to be replaced
+    for line in site.split("\n"):#Each line of html from the page
+        if "<img" in line and "course__image" in line:#if the course hero is found
+            line=line.split(">")[0]#splits so line is just the img line of code
+            imageURL=re.findall(r'src="([^? ]+)',line)[0]
+            
+
+            #cleanup so we're left with just the url
+            imageURLReplacables=['<img src="','" alt','"']
+            imageURL=imageURL.replace("&amp;"," ")
+            for replacable in imageURLReplacables:
+                imageURL=imageURL.replace(replacable,"")
+            print("Image URL:",imageURL)
+
+
+            if checkImageSize(imageURL)==True:#If the image is a good size
+                idFile=open((root+"mediaIds.txt"),"r",encoding="utf-8")#opens the massive file with ALL the bcu images
+                for idLine in idFile.readlines():#Reads through each line of the big file
+                    if imageURL in idLine:#If a line is found containing the url we're looking for
+                        foundLine=True
+                        idFile.close()#gotta save memory because this is incredibly efficient code of professional standard ;)
+                        imgAlt=re.findall("""<img\s+.*?alt="(.*?)".*?>""",idLine)[0]#regex filter's the alt text from the line
+                        imgData=re.findall("""<img\s+.*?data-source="([^"]*)".*?>""",idLine)[0]#regex filters the data-source from the line
+                        foundLine=False#Resets var so the variables are set to the temp values
+                if foundLine==False:#if the img tag cant be found in the big doc, uses temp data
+                    print("Couldn't find image in document, using temp data")
+                    imgAlt="Image Alt"
+                    imgData="1234-567"
+
+            elif checkImageSize(imageURL)==False:#If image isn't correct resolution
+                imageURL="$MANUALIMAGE"#different replacable so a custom template image can be put in
+                imgAlt="Image Alt"
+                imgData="1234-567"
+
+                #replaces the imgTag template with actual data
+                imgTag=imgTag.replace("$IMGURL",imageURL)
+                imgTag=imgTag.replace("$IMGALT",imgAlt)
+                imgTag=imgTag.replace("$IMGDATA",imgData)
+
+                return imgTag
+
+
+
+def getImageTagBad(site):
     for line in site.split("\n"):
         if "<img" in line and "course__image" in line:
             line=line.split(">")[0]
@@ -144,7 +189,7 @@ def compileHTML(courseURL,site):
     
 '''
 
-    replaceImageTag=getImageTag(site)
+    replaceImageTag="imageTag"#getImageTag(site)
     replaceCourseTitle=getTitle(site)
     replaceCourseEntry=getEntry(site)
     replaceCourseURL=getURL(courseURL)
