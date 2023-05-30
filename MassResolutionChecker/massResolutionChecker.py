@@ -49,15 +49,16 @@ def initScrape(siteURL):
             site=scrape(siteURL)#Gets HTML as plain text
             printLine=("Read HTML for site:"+siteURL)
             print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")#prints lined up %
-            if checkImageSize(getImageURL(site))==False:
-                try:
-                    sizeX,sizeY=getResolution((root+"sizeCheck.jpg"))
-                    writer.writerow([getTitle(site),siteURL,sizeX,sizeY])#writes info from each func into csv
-                except AttributeError:
-                    print("Error:",siteURL)
-                    writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
+            sizeX,sizeY=checkImageSize(getImageURL(site))
+            try:
+                writer.writerow([getTitle(site),siteURL,sizeX,sizeY])#writes info from each func into csv
+            except AttributeError:
+                print("Error:",siteURL)
+                writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
         except AttributeError:
             print("URL probably doesnt exist")
+            writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
+
 
 def scrape(siteURL):#Gets the source code of the page and writes it into a text file
     global similarCounter
@@ -106,11 +107,7 @@ def checkImageSize(imageURL):
         urllib.request.urlretrieve(imageURL, imagePath)
     im = Image.open(imagePath)
     print("Hero Image Size:",im.size)
-    if im.size[0]>=imgMinX and im.size[0]<imgMaxX:
-        if im.size[1]>=imgMinY and im.size[1]<=imgMaxY:
-            return True
-    else:            
-        return False
+    return im.size[0],im.size[1]
 
 
 def getTitle(site):#Gets the title from the url
