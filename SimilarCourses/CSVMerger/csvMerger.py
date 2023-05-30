@@ -8,8 +8,8 @@ print("Root Dir:",root)
 
 
 #opens the csv of courses with their similar children, and the csv containing each individual similar code
-codeCSV=csv.reader(open(root+"code.csv","r",newline='', encoding="utf-8-sig"), delimiter=' ', quotechar='|')#output spreadsheet Excel requires the UTF-8-encoded BOM code point
-coursesCSV=csv.reader(open(root+"courses.csv","r",newline='', encoding="utf-8-sig"), delimiter=' ', quotechar='|')#output spreadsheet Excel requires the UTF-8-encoded BOM code point
+codeCSV=csv.reader(open(root+"code.csv","r",newline='', encoding="utf-8-sig"), delimiter=',', quotechar='|')#output spreadsheet Excel requires the UTF-8-encoded BOM code point
+coursesCSV=csv.reader(open(root+"courses.csv","r",newline='', encoding="utf-8-sig"), delimiter=',', quotechar='|')#output spreadsheet Excel requires the UTF-8-encoded BOM code point
 
 
 #sets up output file
@@ -18,6 +18,11 @@ writer = csv.writer(outCSV)#starts the writer
 headers=["Title","URL","Faculty","School","Combined Codes"]
 writer.writerow(headers)#Writes the headers at the top of the spreadsheet
 
-
+for codeRow in codeCSV:
+    print(codeRow)
+    print("-"*10)
+print("_"*30)
 for courseRow in coursesCSV:
-    print(courseRow)
+    print(courseRow[0])
+
+    print("-"*10)
