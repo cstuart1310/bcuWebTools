@@ -93,12 +93,14 @@ def getImageTag(site):
     for line in site.split("\n"):#Each line of html from the page
         if "<img" in line and "course__image" in line:#if the course hero is found
             line=line.split(">")[0]#splits so line is just the img line of code
-            imageURL=re.findall(r'src="([^? ]+)',line)[0]
+            imageURL=re.findall(r'src="([^"]+)"',line)[0]
             
 
             #cleanup so we're left with just the url
             imageURLReplacables=['<img src="','" alt','"']
             imageURL=imageURL.replace("&amp;"," ")
+            imageURL=imageURL.replace(" ", "%20")
+
             for replacable in imageURLReplacables:
                 imageURL=imageURL.replace(replacable,"")
             print("Image URL:",imageURL)
