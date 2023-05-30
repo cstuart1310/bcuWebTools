@@ -45,17 +45,19 @@ def initScrape(siteURL):
     if "https://" not in siteURL:#If url file contains something that isnt a url
         print(siteURL)
     else:
-        site=scrape(siteURL)#Gets HTML as plain text
-        printLine=("Read HTML for site:"+siteURL)
-        print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")#prints lined up %
-        if checkImageSize(getImageURL(site))==False:
-            try:
-                sizeX,sizeY=getResolution((root+"sizeCheck.jpg"))
-                writer.writerow([getTitle(site),siteURL,sizeX,sizeY])#writes info from each func into csv
-            except AttributeError:
-                print("Error:",siteURL)
-                writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
-
+        try:
+            site=scrape(siteURL)#Gets HTML as plain text
+            printLine=("Read HTML for site:"+siteURL)
+            print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")#prints lined up %
+            if checkImageSize(getImageURL(site))==False:
+                try:
+                    sizeX,sizeY=getResolution((root+"sizeCheck.jpg"))
+                    writer.writerow([getTitle(site),siteURL,sizeX,sizeY])#writes info from each func into csv
+                except AttributeError:
+                    print("Error:",siteURL)
+                    writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
+        except AttributeError:
+            print("URL probably doesnt exist")
 
 def scrape(siteURL):#Gets the source code of the page and writes it into a text file
     global similarCounter
@@ -96,7 +98,12 @@ def checkImageSize(imageURL):
     #Downloads URL
     imagePath=root+"sizeCheck.jpg"
     imageURL=imageURL.replace(" ", "%20")
-    urllib.request.urlretrieve(imageURL, imagePath)
+    try:
+        urllib.request.urlretrieve(imageURL, imagePath)
+    except PermissionError:
+        print("Error, waiting and retrying")
+        time.sleep(3)
+        urllib.request.urlretrieve(imageURL, imagePath)
     im = Image.open(imagePath)
     print("Hero Image Size:",im.size)
     if im.size[0]>=imgMinX and im.size[0]<imgMaxX:
