@@ -1,4 +1,5 @@
 import time #Used for timing the program to get estimates
+import datetime#used to tell when finished (For when you leave a terminal open for ages and cant remember if you hit run)
 import urllib.request #Used to grab the html
 from urllib import request
 import io #Used to mess with files with weird encoding
@@ -8,7 +9,8 @@ import csv#Used to write the info into a csv
 from bs4 import BeautifulSoup #Used just to parse the title of the page
 import os
 from PIL import Image
-import webbrowser
+from urllib import request
+
 
 
 print("\n"*5)
@@ -25,7 +27,6 @@ imgMaxY=1000
 
 imgMinX=500
 imgMinY=100
-imgLeeway=0.95#%
 
 idLines=open((root+"mediaIds.txt"),"r",encoding="utf-8").readlines()#opens the massive file with ALL the bcu images
 
@@ -47,15 +48,26 @@ def initScrape(siteURL):
     if "https://" not in siteURL:#If url file contains something that isnt a url
         print(siteURL)
     else:
-        site=scrape(siteURL)#Gets HTML as plain text
-        printLine=("Read HTML for site:"+siteURL)
-        print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")#prints lined up %
-        
-        try:
-            writer.writerow([getTitle(site),siteURL,getFaculty(site),getSchool(site),"",compileHTML(siteURL,site)])#writes info from each func into csv
-        except AttributeError:
-            print("Error:",siteURL)
-            writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
+        if isRedirect(siteURL)==False:#if the page is not a redirect
+            site=scrape(siteURL)#Gets HTML as plain text
+            printLine=("Read HTML for site:"+siteURL)
+            print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")#prints lined up %
+            
+            try:
+                writer.writerow([getTitle(site),siteURL,getFaculty(site),getSchool(site),"",compileHTML(siteURL,site)])#writes info from each func into csv
+            except AttributeError:
+                print("Error:",siteURL)
+                writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
+        else:
+            writer.writerow(["Redirect",siteURL,"Redirect","Redirect","Redirect","Redirect"])
+def isRedirect(url):#checks if the page redirects somewhere else, in which case ignores
+    response = request.urlopen(url)#loads page
+    new_url = str(response.geturl())#gets new url
+    if url==new_url:#If the given URL and the opened URL are the same
+        return False#is not a redirect
+    else:#If they are different (Redirected)
+        print("Page is a redirect")
+        return True#is a redirect
 
 
 def scrape(siteURL):#Gets the source code of the page and writes it into a text file
@@ -271,7 +283,7 @@ if continueInp=="y":#Confirm start
     print("-----Done scraping!-----")
     end = time.time()#Ends the timer
     timeTaken = end - start#Gets the time it took to scrape and process everything
-    
+    print("Finished at",datetime.time)
     if len(errorLinks)>0:#If there is at least one link that didn't load
         print("-----Links that errored for some reason-----")
         for link in errorLinks:
