@@ -11,7 +11,7 @@ from PIL import Image
 import webbrowser
 
 
-print("-"*30)
+print("\n"*5)
 root=os.path.dirname(os.path.abspath(__file__))+"\\"
 print("Root Dir:",root)
 
@@ -91,7 +91,7 @@ def getImageTag(site):
                 imageURL=imageURL.replace(replacable,"")
             print("Image URL:",imageURL)
 
-
+            
             if checkImageSize(imageURL)==True:#If the image is a good size
                 for idLine in idLines:#Reads through each line of the big file
                     if imageURL in idLine:#If a line is found containing the url we're looking for
@@ -103,7 +103,7 @@ def getImageTag(site):
                     imgAlt="Image Alt"
                     imgData="1234-567"
 
-            elif checkImageSize(imageURL)==False:#If image isn't correct resolution
+            else:#If image isn't correct resolution
                 imageURL="$MANUALIMAGE"#different replacable so a custom template image can be put in
                 imgAlt="Image Alt"
                 imgData="1234-567"
