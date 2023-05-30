@@ -14,15 +14,19 @@ kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
 
 PIL.Image.MAX_IMAGE_PIXELS = 933120000 #Increases the number of pixels pillow can read (Else it thinks big images are zip bombs, dumbass lib)
 
-tinyKeys=["2qBR9TsY7zxL8Q0HsBLnnNf65nY52y4f","Lts1zqlkzjzxbvDNvj9NZl6zNDNVBmZH","YjCS9FvvdBmZJ8pgZwwVwGR9bvmQ7lpT"]
+
+root=os.path.dirname(os.path.abspath(__file__))+"\\"
+print("Root Dir:",root)
+
+
+tinyKeys=open((root+"tinyKeys.txt"),"r").read().splitlines()
+print(tinyKeys)
+print("Loaded",len(tinyKeys),"API Keys")
 tinyKeyVal=0
 tinify.key = tinyKeys[tinyKeyVal]
 
 compressions_this_month = tinify.compression_count
 
-
-root=os.path.dirname(os.path.abspath(__file__))+"\\"
-print("Root Dir:",root)
 
 rawPath=root+"Raw\\"
 resizedPath=root+"Resized\\"
