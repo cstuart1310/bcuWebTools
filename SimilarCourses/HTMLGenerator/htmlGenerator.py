@@ -20,11 +20,11 @@ foundCount=0
 foundLinks=[]
 errorLinks=[]
 
-imgMaxX=1300
-imgMaxY=500
+imgMaxX=2000
+imgMaxY=1000
 
-imgMinX=1100
-imgMinY=400
+imgMinX=500
+imgMinY=100
 imgLeeway=0.95#%
 
 idLines=open((root+"mediaIds.txt"),"r",encoding="utf-8").readlines()#opens the massive file with ALL the bcu images
