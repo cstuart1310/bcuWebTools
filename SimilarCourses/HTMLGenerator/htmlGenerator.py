@@ -97,21 +97,24 @@ def getImageTag(site):
             
 
             #cleanup so we're left with just the url
-            imageURLReplacables=['<img src="','" alt','"']
-            imageURL=imageURL.replace("&amp;"," ")
-            imageURL=imageURL.replace(" ", "%20")
+            # imageURLReplacables=['<img src="','" alt','"']
+            # imageURL=imageURL.replace("<img src=","")
+            # imageURL=imageURL.replace('"',"")
+            
 
-            for replacable in imageURLReplacables:
-                imageURL=imageURL.replace(replacable,"")
+            # for replacable in imageURLReplacables:
+            #     imageURL=imageURL.replace(replacable,"")
+            imageURL=re.findall(r'[^?]+',imageURL)[0]
             print("Image URL:",imageURL)
-
             
             if checkImageSize(imageURL)==True:#If the image is a good size
                 for idLine in idLines:#Reads through each line of the big file
                     if imageURL in idLine:#If a line is found containing the url we're looking for
                         foundLine=True
+                        print("Found line")
                         imgAlt=re.findall("""<img\s+.*?alt="(.*?)".*?>""",idLine)[0]#regex filter's the alt text from the line
                         imgData=re.findall("""<img\s+.*?data-source="([^"]*)".*?>""",idLine)[0]#regex filters the data-source from the line
+                        break
                 if foundLine==False:#if the img tag cant be found in the big doc, uses temp data
                     print("Couldn't find image in document, using temp data")
                     imgAlt="Image Alt"
@@ -132,7 +135,8 @@ def getImageTag(site):
 
 
 def checkImageSize(imageURL):
-    
+    imageURL=imageURL.replace(" ", "%20")
+
     #Downloads URL
     imagePath=root+"sizeCheck.jpg"
     try:
