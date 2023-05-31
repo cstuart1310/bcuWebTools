@@ -11,14 +11,10 @@ output.csv
 *.csv
 USPFinder/Spreadsheets/Output 14 09 22.xlsx
 *.xlsx
-USPFinder/averageTime.txt
-USPFinder/averageTime.txt
-USPFinder/averageTime.txt
+*averageTime.txt
 USPFinder/root.txt
-USPFinder/averageTime.txt
 USPFinder/linksAll.txt
 USPFinder/root.txt
-USPFinder/averageTime.txt
 links.txt
 ListComparer/dontMatches.txt
 ListComparer/ListA.txt
@@ -27,7 +23,6 @@ ListComparer/matches.txt
 SimilarCourses/averageTime.txt
 SimilarCourses/replacables.txt
 SimilarCourses/site.txt
-USPFinder/averageTime.txt
 USPFinder/B ADM PG.txt
 USPFinder/B ADM UG.txt
 USPFinder/B BLSS PG.txt
@@ -44,7 +39,6 @@ USPFinder/Spreadsheets/Export/855E8000
 USPFinder/Spreadsheets/Export/C Export 2/Individual USPs Jan 2023.zip
 USPFinder/Spreadsheets/Export/C Export 2/USP Project Main v36 Carrie Export 2 Sent Zip.zip
 USPFinder/Spreadsheets/Export/C Export 3/USP Project BP Version.zip
-USPFinder/averageTime.txt
 Ignored/webScrapeUI.py
 Ignored/*
 Tinifier/AutoCompressed/*

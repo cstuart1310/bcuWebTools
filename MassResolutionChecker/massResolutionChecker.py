@@ -36,7 +36,7 @@ except PermissionError:
 
 
 writer = csv.writer(outFile)#starts the writer
-headers=["Title","URL","Size X","Size Y"]
+headers=["Title","Page URL","Size X","Size Y","Type","Image URL"]
 writer.writerow(headers)#Writes the headers at the top of the spreadsheet
 
 def initScrape(siteURL):
@@ -45,19 +45,20 @@ def initScrape(siteURL):
     if "https://" not in siteURL:#If url file contains something that isnt a url
         print(siteURL)
     else:
-        try:
-            site=scrape(siteURL)#Gets HTML as plain text
-            printLine=("Read HTML for site:"+siteURL)
-            print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")#prints lined up %
-            sizeX,sizeY=checkImageSize(getImageURL(site))
-            try:
-                writer.writerow([getTitle(site),siteURL,sizeX,sizeY])#writes info from each func into csv
-            except AttributeError:
-                print("Error:",siteURL)
-                writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
-        except AttributeError:
-            print("URL probably doesnt exist")
-            writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
+        site=scrape(siteURL)#Gets HTML as plain text
+        printLine=("Read HTML for site:"+siteURL)
+        print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")#prints lined up %
+        imageURLs,headerType=getImageURL(site)
+        print("Checking",len(imageURLs),"URLs")
+        for imageURL in imageURLs:
+            
+            imageURL="".join(imageURL)#the worst way to fix this
+            sizeX,sizeY, = checkImageSize(imageURL)
+            writer.writerow([getTitle(site),siteURL,sizeX,sizeY,headerType,imageURL])#writes info from each func into csv
+        # print("Error:",siteURL)
+        # writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
+        # print("URL probably doesnt exist")
+        # writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
 
 
 def scrape(siteURL):#Gets the source code of the page and writes it into a text file
@@ -76,19 +77,26 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
     
 def getImageURL(site):
     foundLine=False
+    imageURLs=None
+    headerType="None"
+    #gets the url if its' a hero image
     for line in site.split("\n"):#Each line of html from the page
         if "<img" in line and "course__image" in line:#if the course hero is found
             line=line.split(">")[0]#splits so line is just the img line of code
-            imageURL=re.findall(r'src="([^"]+)"',line)[0]
-            
+            imageURLs=re.findall(r'src="([^"]+)"',line)
+            headerType="Hero"
+            print("Image URLs:",imageURLs)
+            return imageURLs, headerType    
+            #stops looking through the file
+        elif "swiper swiperCourseGallery" in line:#if this is found meaning the course has a gallery
+            galleryImageSection=site.split("swiper swiperCourseGallery")[1]#after this bit
+            galleryImageSection=galleryImageSection.split("swiper-button-prev")[0]#before this bit
+            imageURLs=re.findall(r'src="([^"]+)',galleryImageSection)#finds the src="www.rrjrrjewrjoiejorijo" bit
+            headerType="Gallery"
+            #stops looking through the file
+            print("Image URLs:",imageURLs)
+            return imageURLs, headerType    
 
-            #cleanup so we're left with just the url
-            imageURLReplacables=['<img src="','" alt','"']
-            imageURL=imageURL.replace("&amp;"," ")
-            for replacable in imageURLReplacables:
-                imageURL=imageURL.replace(replacable,"")
-            print("Image URL:",imageURL)
-            return imageURL
 
 def getResolution(imagePath):
     im = Image.open(imagePath)
