@@ -1,4 +1,5 @@
 import time #Used for timing the program to get estimates
+import datetime#used to tell when finished (For when you leave a terminal open for ages and cant remember if you hit run)
 import urllib.request #Used to grab the html
 from urllib import request
 import io #Used to mess with files with weird encoding
@@ -8,10 +9,11 @@ import csv#Used to write the info into a csv
 from bs4 import BeautifulSoup #Used just to parse the title of the page
 import os
 from PIL import Image
-import webbrowser
+from urllib import request
 
 
-print("-"*30)
+
+print("\n"*5)
 root=os.path.dirname(os.path.abspath(__file__))+"\\"
 print("Root Dir:",root)
 
@@ -20,13 +22,13 @@ foundCount=0
 foundLinks=[]
 errorLinks=[]
 
-imgMaxX=1300
-imgMaxY=500
+imgMaxX=2000
+imgMaxY=1000
 
-imgMinX=1100
-imgMinY=400
-imgLeeway=0.95#%
+imgMinX=500
+imgMinY=100
 
+idLines=open((root+"mediaIds.txt"),"r",encoding="utf-8").readlines()#opens the massive file with ALL the bcu images
 
 try:
     outFile=open(root+"output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
@@ -46,15 +48,26 @@ def initScrape(siteURL):
     if "https://" not in siteURL:#If url file contains something that isnt a url
         print(siteURL)
     else:
-        site=scrape(siteURL)#Gets HTML as plain text
-        printLine=("Read HTML for site:"+siteURL)
-        print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")
-        
-        try:
-            writer.writerow([getTitle(site),siteURL,getFaculty(site),getSchool(site),"",compileHTML(siteURL,site)])
-        except AttributeError:
-            print("Error:",siteURL)
-            writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
+        if isRedirect(siteURL)==False:#if the page is not a redirect
+            site=scrape(siteURL)#Gets HTML as plain text
+            printLine=("Read HTML for site:"+siteURL)
+            print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")#prints lined up %
+            
+            try:
+                writer.writerow([getTitle(site),siteURL,getFaculty(site),getSchool(site),"",compileHTML(siteURL,site)])#writes info from each func into csv
+            except AttributeError:
+                print("Error:",siteURL)
+                writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
+        else:
+            writer.writerow(["Redirect",siteURL,"Redirect","Redirect","Redirect","Redirect"])
+def isRedirect(url):#checks if the page redirects somewhere else, in which case ignores
+    response = request.urlopen(url)#loads page
+    new_url = str(response.geturl())#gets new url
+    if url==new_url:#If the given URL and the opened URL are the same
+        return False#is not a redirect
+    else:#If they are different (Redirected)
+        print("Page is a redirect")
+        return True#is a redirect
 
 
 def scrape(siteURL):#Gets the source code of the page and writes it into a text file
@@ -70,65 +83,66 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
         errorLinks.append([siteURL,"404'd"])#Adds to array to tell user broken links at end of program
         writer.writerow(["None",siteURL,"","","""Page is not public"""])#Writes the error into the csv
         return False
-
+    
 def getImageTag(site):
-    for line in site.split("\n"):
-        if "<img" in line and "course__image" in line:
-            line=line.split(">")[0]
+    foundLine=False
+    imgTag="""<img src="$IMGURL" alt="$IMGALT" data-source="$IMGDATA">"""#template to be replaced
+    imageURL="$MANUALIMAGE"#different replacable so a custom template image can be put in
+    imgAlt="Image Alt"
+    imgData="1234-567"
+    for line in site.split("\n"):#Each line of html from the page
+        if "<img" in line and "course__image" in line:#if the course hero is found
+            line=line.split(">")[0]#splits so line is just the img line of code
+            imageURL=re.findall(r'src="([^"]+)"',line)[0]
+            
 
-            #gets image url
-            imageURL=re.findall(r'src="([^? ]+)',line)[0]
-            print("URL",imageURL)
-            #gets the URL from the tag
+            #cleanup so we're left with just the url
             imageURLReplacables=['<img src="','" alt','"']
             imageURL=imageURL.replace("&amp;"," ")
+            imageURL=imageURL.replace(" ", "%20")
+
             for replacable in imageURLReplacables:
                 imageURL=imageURL.replace(replacable,"")
-            if checkImageSize(imageURL)==False:
-                imageURL="$MANUALIMAGE"
+            print("Image URL:",imageURL)
 
-            idFile=open((root+"mediaIds.txt"),"r",encoding="utf-8")
-            for idLine in idFile.readlines():
-                if imageURL in idLine:
-                    break
-            idFile.close()
-            try:
-                imgAlt=re.findall(r'alt="([^?"]+)',idLine)[0]
-            except IndexError:
-                imgAlt=re.findall(r'"alt=""')[0]
-            imgData=re.findall(r'data-source="([^?"]+)',idLine)[0]
-            print("URL:",imageURL)
-            print("Data:",imgData)
-            print("Alt:",imgAlt)            
-            # webbrowser.open(imageURL)
-            # https://www.bcu.ac.uk/cms/mediamanager/ImageBrowser?Inline=False&mediaType=&search=test&pageSize=20&view=Thumbnails
-            #os.startfile(imgURL)
-#            webbrowser.get('firefox').open_new_tab(imgURL)
-            imgTag="""<img src="$IMGURL" alt="$IMGALT" data-source="$IMGDATA">"""
-            imgTag=imgTag.replace("$IMGURL",imageURL)
-            imgTag=imgTag.replace("$IMGALT",imgAlt)
-            imgTag=imgTag.replace("$IMGDATA",imgData)
-            return imgTag
-    return "None found"
+            
+            if checkImageSize(imageURL)==True:#If the image is a good size
+                for idLine in idLines:#Reads through each line of the big file
+                    if imageURL in idLine:#If a line is found containing the url we're looking for
+                        foundLine=True
+                        imgAlt=re.findall("""<img\s+.*?alt="(.*?)".*?>""",idLine)[0]#regex filter's the alt text from the line
+                        imgData=re.findall("""<img\s+.*?data-source="([^"]*)".*?>""",idLine)[0]#regex filters the data-source from the line
+                if foundLine==False:#if the img tag cant be found in the big doc, uses temp data
+                    print("Couldn't find image in document, using temp data")
+                    imgAlt="Image Alt"
+                    imgData="1234-567"
+
+            else:#If image isn't correct resolution
+                imageURL="$MANUALIMAGE"#different replacable so a custom template image can be put in
+                imgAlt="Image Alt"
+                imgData="1234-567"
+
+                #replaces the imgTag template with actual data
+    imgTag=imgTag.replace("$IMGURL",imageURL)
+    imgTag=imgTag.replace("$IMGALT",imgAlt)
+    imgTag=imgTag.replace("$IMGDATA",imgData)
+
+    return imgTag
+
+
 
 def checkImageSize(imageURL):
     
     #Downloads URL
-    print(imageURL)
-    imagePath=root+"test.jpg"
-    print(imagePath)
-    print("Downloading")
+    imagePath=root+"sizeCheck.jpg"
     try:
         urllib.request.urlretrieve(imageURL, imagePath)
-        print("Downloaded")
         im = Image.open(imagePath)
-        print("Size:",im.size)
+        print("Hero Image Size:",im.size)
         if im.size[0]>=imgMinX and im.size[0]<imgMaxX:
             if im.size[1]>=imgMinY and im.size[1]<=imgMaxY:
-                print("Good size")
                 return True
-        else:
-            print("Bad size")
+        else:            
             return False
     except Exception as e:
         print(e)
@@ -146,17 +160,24 @@ def compileHTML(courseURL,site):
     
 '''
 
-    
+    replaceImageTag=getImageTag(site)
+    replaceCourseTitle=getTitle(site)
+    replaceCourseEntry=getEntry(site)
+    replaceCourseURL=getURL(courseURL)
+    print("Title:",replaceCourseTitle)
+    print("Entry Year:",replaceCourseEntry)
+    print("URL:",replaceCourseURL)
+    print("Image Tag:",replaceImageTag)
     try:
         code=template.replace("$IMAGETAG",getImageTag(site))#getImageTag(site))
-    except:
-        print("Bad img")
-        return "Bad img"
+    except Exception as e:
+        print("Bad img",e)
+        #return "Bad img"
 
     try:
         code=code.replace("$COURSETITLE",getTitle(site))
-    except:
-        print("Bad title")
+    except Exception as e:
+        print("Bad title",e)
         return "Bad title"
     try:
         code=code.replace("$COURSEENTRY",getEntry(site))
@@ -211,6 +232,7 @@ def getTitle(site):#Gets the title from the url
         if "<h1>" in line:
             line=line.replace("<h1>","")
             line=line.replace("</h1>","")
+            line=re.sub(r"\s{2,}","",line)
             return line
 
 def getEntry(site):#Entry year
@@ -218,13 +240,14 @@ def getEntry(site):#Entry year
     # title= (soup.title.string)#gets the page title from soup
     
     try:
-        entry=str(re.findall("[2].*Entry",site)[0])#Looks between 2 and entry in the page (Will need to futureproof since won't work for courses in the year 3000+)
+        entry=str(re.findall("202[0-9]/(?:2[0-9]|30) Entry",site)[0])#Looks between 2 and entry in the page (Will need to futureproof since won't work for courses in the year 3000+)
         entry=entry.replace("- ","")
         entry=entry.replace(" -","")
         entry=entry.replace(" |","")
         return entry
-    except IndexError:
-        return "Can't find Entry"
+
+    except:
+        return False
     
 
 def getURL(url):#Gets the url in a domain-less format
@@ -239,7 +262,6 @@ linksLength=len(links)#Stored as a variable for convenience
 print("Found",linksLength,"links to look through")
 
 replacables=[replacable.rstrip() for replacable in open(root+"replacables.txt","r").readlines()]#Gets links from file without trailing \n
-#print("Replacables:",replacables)
 
 
 
@@ -257,12 +279,13 @@ if continueInp=="y":#Confirm start
     start = time.time()#starts the timer
     siteIndex=0#Index 0 for the pos of the site url in the list
     for siteURL in links:#Iterates through each URL in the file
+        print("-"*10)
         initScrape(siteURL)
 
     print("-----Done scraping!-----")
     end = time.time()#Ends the timer
     timeTaken = end - start#Gets the time it took to scrape and process everything
-    
+    print("Finished at",datetime.time)
     if len(errorLinks)>0:#If there is at least one link that didn't load
         print("-----Links that errored for some reason-----")
         for link in errorLinks:
