@@ -8,7 +8,6 @@ import csv#Used to write the info into a csv
 from bs4 import BeautifulSoup #Used just to parse the title of the page
 import os
 from PIL import Image
-import webbrowser
 
 
 print("\n"*5)
@@ -36,7 +35,7 @@ except PermissionError:
 
 
 writer = csv.writer(outFile)#starts the writer
-headers=["Title","Page URL","Size X","Size Y","Type","Image URL"]
+headers=["Title","Page URL","Size X","Size Y","Type","Image URL","Ideal Size","Not Ideal size but ok with leeway?","X Ideal Size with leeway?","Y Ideal Size with leeway?","Both Bad?"]
 writer.writerow(headers)#Writes the headers at the top of the spreadsheet
 
 def initScrape(siteURL):
@@ -45,21 +44,17 @@ def initScrape(siteURL):
     if "https://" not in siteURL:#If url file contains something that isnt a url
         print(siteURL)
     else:
-        site=scrape(siteURL)#Gets HTML as plain text
-        printLine=("Read HTML for site:"+siteURL)
-        print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")#prints lined up %
-        imageURLs,headerType=getImageURL(site)
-        print("Checking",len(imageURLs),"URLs")
-        for imageURL in imageURLs:
-            
-            imageURL="".join(imageURL)#the worst way to fix this
-            sizeX,sizeY, = checkImageSize(imageURL)
-            writer.writerow([getTitle(site),siteURL,sizeX,sizeY,headerType,imageURL])#writes info from each func into csv
-        # print("Error:",siteURL)
-        # writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
-        # print("URL probably doesnt exist")
-        # writer.writerow(["Error",siteURL,"Error","Error","Error","Error"])
-
+        if isRedirect(siteURL)==False:#If the page is not a redirect (Is still online)
+            site=scrape(siteURL)#Gets HTML as plain text
+            printLine=("Read HTML for site:"+siteURL)
+            print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")#prints lined up %
+            imageURLs,headerType=getImageURL(site)
+            print("Checking",len(imageURLs),"URLs")
+            for imageURL in imageURLs:
+                
+                imageURL="".join(imageURL)#the worst way to fix this
+                sizeX,sizeY, = checkImageSize(imageURL)
+                writer.writerow([getTitle(site),siteURL,sizeX,sizeY,headerType,imageURL])#writes info from each func into csv
 
 def scrape(siteURL):#Gets the source code of the page and writes it into a text file
     global similarCounter
@@ -126,6 +121,14 @@ def getTitle(site):#Gets the title from the url
             line=re.sub(r"\s{2,}","",line)
             return line
 
+def isRedirect(url):#checks if the page redirects somewhere else, in which case ignores
+    response = request.urlopen(url)#loads page
+    new_url = str(response.geturl())#gets new url
+    if url==new_url:#If the given URL and the opened URL are the same
+        return False#is not a redirect
+    else:#If they are different (Redirected)
+        print("Page is a redirect")
+        return True#is a redirect
 
 def getURL(url):#Gets the url in a domain-less format
     url=url.replace("https://www.bcu.ac.uk","")
