@@ -24,7 +24,7 @@ imgMaxY=450
 
 imgMinX=1200
 imgMinY=450
-imgLeeway=1#%
+imgLeeway=1.1#%
 
 try:
     outFile=open(root+"output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
@@ -35,7 +35,7 @@ except PermissionError:
 
 
 writer = csv.writer(outFile)#starts the writer
-headers=["Title","Page URL","Size X","Size Y","Type","Image URL","Ideal Size","Not Ideal size but ok with leeway?","X Ideal Size with leeway?","Y Ideal Size with leeway?","Both Bad?"]
+headers=["Title","Page URL","Size X","Size Y","Type","Image URL","Ideal Size","Not Ideal size but ok with leeway?","Both Bad?"]
 writer.writerow(headers)#Writes the headers at the top of the spreadsheet
 
 def initScrape(siteURL):
@@ -49,12 +49,13 @@ def initScrape(siteURL):
             printLine=("Read HTML for site:"+siteURL)
             print(printLine+(" "*(150-(len(printLine))))+str(siteIndex)+"/"+str(linksLength)+" "+str(round(((100/linksLength)*siteIndex),2))+"%")#prints lined up %
             imageURLs,headerType=getImageURL(site)
+            print("Header Type:",headerType)
             print("Checking",len(imageURLs),"URLs")
             for imageURL in imageURLs:
                 
                 imageURL="".join(imageURL)#the worst way to fix this
                 sizeX,sizeY, = checkImageSize(imageURL)
-                writer.writerow([getTitle(site),siteURL,sizeX,sizeY,headerType,imageURL])#writes info from each func into csv
+                writer.writerow([getTitle(site),siteURL,sizeX,sizeY,headerType,imageURL,sizeChecks(sizeX,sizeY,headerType)])#writes info from each func into csv
 
 def scrape(siteURL):#Gets the source code of the page and writes it into a text file
     global similarCounter
@@ -69,6 +70,19 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
         errorLinks.append([siteURL,"404'd"])#Adds to array to tell user broken links at end of program
         writer.writerow(["None",siteURL,"","","""Page is not public"""])#Writes the error into the csv
         return False
+    
+def sizeChecks(sizeX,sizeY,headerType):
+    if headerType=="Hero":
+        idealSizeX,idealSizeY=1200,450
+    elif headerType=="Gallery":
+        idealSizeX,idealSizeY=1600,900
+    
+    if sizeX==idealSizeX and sizeY==idealSizeY:
+        return "Ideal"
+    elif sizeX>=idealSizeX/imgLeeway and sizeX<=idealSizeY*imgLeeway and sizeY>=idealSizeY/imgLeeway and sizeY<=idealSizeY*imgLeeway:
+        return "Ideal with leeway"
+    else:
+        return "Needs to be changed"
     
 def getImageURL(site):
     foundLine=False
@@ -109,7 +123,7 @@ def checkImageSize(imageURL):
         time.sleep(3)
         urllib.request.urlretrieve(imageURL, imagePath)
     im = Image.open(imagePath)
-    print("Hero Image Size:",im.size)
+    print("Image Size:",im.size)
     return im.size[0],im.size[1]
 
 
