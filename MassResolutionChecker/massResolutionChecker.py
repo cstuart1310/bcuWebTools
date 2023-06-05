@@ -35,7 +35,7 @@ except PermissionError:
 
 
 writer = csv.writer(outFile)#starts the writer
-headers=["Title","Page URL","Size X","Size Y","Type","Image URL","Ideal Size","Not Ideal size but ok with leeway?","Both Bad?"]
+headers=["Title","Page URL","Size X","Size Y","Type","Image URL","Status"]
 writer.writerow(headers)#Writes the headers at the top of the spreadsheet
 
 def initScrape(siteURL):
@@ -74,14 +74,27 @@ def scrape(siteURL):#Gets the source code of the page and writes it into a text 
 def sizeChecks(sizeX,sizeY,headerType):
     if headerType=="Hero":
         idealSizeX,idealSizeY=1200,450
+        
     elif headerType=="Gallery":
         idealSizeX,idealSizeY=1600,900
     
+    leewaySizeXMax=int(idealSizeX*imgLeeway)
+    leewaySizeYMax=int(idealSizeY*imgLeeway)
+    leewaySizeXMin=int(idealSizeX//imgLeeway)
+    leewaySizeYMin=int(idealSizeY//imgLeeway)
+
+    print("Ideal Size",idealSizeX,idealSizeY)
+    print("Leeway Size Upper",leewaySizeXMax,leewaySizeYMax)
+    print("Leeway Size Lower",leewaySizeXMin,leewaySizeYMin)
+
     if sizeX==idealSizeX and sizeY==idealSizeY:
+        print("Ideal Size")
         return "Ideal"
-    elif sizeX>=idealSizeX/imgLeeway and sizeX<=idealSizeY*imgLeeway and sizeY>=idealSizeY/imgLeeway and sizeY<=idealSizeY*imgLeeway:
+    elif sizeX>=leewaySizeXMin and sizeX<=leewaySizeXMax and sizeY>=leewaySizeYMin and sizeY<=leewaySizeYMax:
+        print("Ideal with leeway")
         return "Ideal with leeway"
     else:
+        print("Needs to be changed")
         return "Needs to be changed"
     
 def getImageURL(site):
@@ -118,9 +131,9 @@ def checkImageSize(imageURL):
     imageURL=imageURL.replace(" ", "%20")
     try:
         urllib.request.urlretrieve(imageURL, imagePath)
-    except PermissionError:
+    except:
         print("Error, waiting and retrying")
-        time.sleep(3)
+        time.sleep(10)
         urllib.request.urlretrieve(imageURL, imagePath)
     im = Image.open(imagePath)
     print("Image Size:",im.size)
