@@ -8,7 +8,7 @@ import os
 root=os.path.dirname(os.path.abspath(__file__))+"\\"
 outFile=open(root+"Redirects.csv","w",newline='')#output spreadsheet
 writer = csv.writer(outFile)#starts the writer
-header=["Course",	"URL",	"Added placement?",	"Mentions Placement Year in course spec?","Redirects to another page?",	"Redirect URL","Double Checked?", "Notes"]#headers to be written to a spreadsheet
+header=["Course","URL","Redirects to another page?","Redirect URL","Notes"]#headers to be written to a spreadsheet
 
 
 writer.writerow(header)#Writes the headers
@@ -36,7 +36,7 @@ for url in links:
         print(url)
         print(new_url)
         redirects.append(url)
-        data=[title,url,"No","","Yes",new_url,"No","Python"]
+        data=[title,url,"Yes",new_url,]
         writer.writerow(data)#writes the result of this one url to the csv
     print("-"*20)
 
