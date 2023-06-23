@@ -28,8 +28,11 @@ for url in links:
         new_url = str(response.geturl())#gets new url
         soup = BeautifulSoup(request.urlopen(url),features="html.parser")#reads the html as soup
         title= (soup.title.string)#gets the page title from soup
-    except:#Either caused by the url having no destination or network issues
+    except Exception as e:#Either caused by the url having no destination or network issues
         print("404")
+        data=[title,url,"Yes",e]
+        writer.writerow(data)#writes the result of this one url to the csv
+
 
     if url!=new_url:#if the original url isn't the same as the destination one
         ("Redirect")
