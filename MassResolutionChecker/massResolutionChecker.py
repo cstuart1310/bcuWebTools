@@ -28,14 +28,16 @@ imgLeeway=1.1#%
 
 try:
     outFile=open(root+"output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
+    outFileSingleCourse=open(root+"outputSingleCourse.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
 except PermissionError:
     print("Error: Close the open file")
     time.sleep(10)
     outFile=open(root+"output.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
+    outFileSingleCourse=open(root+"outputSingleCourse.csv","w",newline='', encoding="utf-8-sig")#output spreadsheet Excel requires the UTF-8-encoded BOM code point 
 
-
+singleCourseWriter = csv.writer(outFileSingleCourse)#starts the writer for course name, image 1, image 2, image 3
 writer = csv.writer(outFile)#starts the writer
-headers=["Title","Page URL","Size X","Size Y","Type","Image URL","Status"]
+headers=["Title","Page URL","Size X","Size Y","File Size (KB)","Type","Image URL","Status"]
 writer.writerow(headers)#Writes the headers at the top of the spreadsheet
 
 def initScrape(siteURL):
@@ -51,11 +53,14 @@ def initScrape(siteURL):
             imageURLs,headerType=getImageURL(site)
             print("Header Type:",headerType)
             print("Checking",len(imageURLs),"URLs")
+            imageSizes=[getTitle(site),siteURL]
             for imageURL in imageURLs:
-                
                 imageURL="".join(imageURL)#the worst way to fix this
-                sizeX,sizeY, = checkImageSize(imageURL)
-                writer.writerow([getTitle(site),siteURL,sizeX,sizeY,headerType,imageURL,sizeChecks(sizeX,sizeY,headerType)])#writes info from each func into csv
+                sizeX,sizeY,fileSize = checkImageRes(imageURL)
+                
+                writer.writerow([getTitle(site),siteURL,sizeX,sizeY,fileSize,headerType,imageURL,sizeChecks(sizeX,sizeY,headerType)])#writes info from each func into csv
+                imageSizes.append([sizeX,sizeY])
+            singleCourseWriter.writerow(imageSizes)#writes info from each func into csv
 
 def scrape(siteURL):#Gets the source code of the page and writes it into a text file
     global similarCounter
@@ -124,7 +129,7 @@ def getResolution(imagePath):
     im = Image.open(imagePath)
     return im.size
 
-def checkImageSize(imageURL):
+def checkImageRes(imageURL):
     
     #Downloads URL
     imagePath=root+"sizeCheck.jpg"
@@ -136,8 +141,9 @@ def checkImageSize(imageURL):
         time.sleep(10)
         urllib.request.urlretrieve(imageURL, imagePath)
     im = Image.open(imagePath)
+    fileSize=str(int(os.path.getsize(imagePath))/1000)
     print("Image Size:",im.size)
-    return im.size[0],im.size[1]
+    return im.size[0],im.size[1],fileSize
 
 
 def getTitle(site):#Gets the title from the url
